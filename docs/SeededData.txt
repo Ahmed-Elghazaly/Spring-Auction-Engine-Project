@@ -1,0 +1,21 @@
+Roles:
+
+* ROLE_USER
+* ROLE_ADMIN
+
+Accounts:
+
+* admin / Admin@123
+* seller1 / Password@123
+* bidder1 / Password@123
+* bidder2 / Password@123
+
+Demo auctions:
+
+* Scheduled auction
+* Open English auction
+* Open sealed-bid auction
+* Closed auction with a winner
+* Cancelled auction
+
+Seeded automatically by SeedDataRunner class when the application starts
