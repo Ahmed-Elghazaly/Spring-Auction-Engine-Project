@@ -34,7 +34,7 @@ public final class Paging {
         Sort order = Sort.by(Sort.Direction.DESC, defaultField);
         if (sort != null && !sort.isBlank()) {
             String[] parts = sort.split(",");
-            String field = parts[0].trim();
+            String field = parts.length > 0 ? parts[0].trim() : "";
             if (allowed.contains(field)) {
                 Sort.Direction direction =
                         (parts.length > 1 && parts[1].trim().equalsIgnoreCase("asc"))

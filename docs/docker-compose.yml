@@ -1,3 +1,7 @@
+# Start:   docker compose --env-file .env -f docs/docker-compose.yml up -d
+# Stop:    docker compose --env-file .env -f docs/docker-compose.yml down
+# Reset:   docker compose --env-file .env -f docs/docker-compose.yml down -v
+# Passwords come from the .env file at the repository root
 services:
   oracle:
     image: gvenzl/oracle-free:23-slim
@@ -5,11 +9,15 @@ services:
     ports:
       - "1521:1521"
     environment:
-      ORACLE_PASSWORD: SysPass
-      APP_USER: bidforge
-      APP_USER_PASSWORD: bidforge_pw
+      # Oracle's own SYS/SYSTEM administrator password.
+      ORACLE_PASSWORD: ${ORACLE_PASSWORD:?set ORACLE_PASSWORD in .env}
+      # create this schema user automatically on first start
+      # It must match spring.datasource.username / DB_PASSWORD in the app.
+      APP_USER: ${DB_USER:-bidforge}
+      APP_USER_PASSWORD: ${DB_PASSWORD:?set DB_PASSWORD in .env}
     volumes:
       - oracle-data:/opt/oracle/oradata
+      - ../bidforge/src/main/resources/db/schema.sql:/container-entrypoint-initdb.d/01-schema.sql:ro
     healthcheck:
       test: [ "CMD", "healthcheck.sh" ]
       interval: 10s

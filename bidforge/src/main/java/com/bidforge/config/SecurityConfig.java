@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -16,7 +17,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-
 
 // @EnableMethodSecurity additionally activates method-level checks
 // @PreAuthorize is used as a second safety layer on admin services
@@ -44,7 +44,6 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-
     // The chain of security filters every HTTP request passes through, and the authorization rules evaluated at the end
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -53,9 +52,14 @@ public class SecurityConfig {
                 // we only use the JWT
                 .csrf(csrf -> csrf.disable())
 
+                // we use the CorsConfigurationSource bean (CorsConfig) so a future
+                // Angular app on another origin can call this API.
+                .cors(Customizer.withDefaults())
+
                 // we don't create an HTTP session bec every request authenticates itself from scratch via its JWT
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
+                // Our JSON replacements for the browser-oriented
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint(authEntryPoint)
                         .accessDeniedHandler(accessDeniedHandler))
@@ -70,8 +74,9 @@ public class SecurityConfig {
                         // but all write operations on auctions still require a JWT
                         .requestMatchers(HttpMethod.GET, "/api/auctions/**").permitAll()
                         .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                        // Admin area: role check at the URL level
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        // Everything else just requires being logged in.
+                        // Everything else just requires being logged in
                         .anyRequest().authenticated())
 
                 // Run our JWT filter before Spring's own username/password filter so the SecurityContext is populated in time

@@ -5,6 +5,7 @@ import com.bidforge.entity.enums.AuctionStatus;
 import com.bidforge.repository.AuctionRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -14,7 +15,12 @@ import java.time.Instant;
 // race-safe bec the opening/closing methods lock the auction row and recheck its status
 // so a scheduler tick racing a manual close doesn't cause an issue
 
+// @ConditionalOnProperty only exists when bidforge.scheduler.enabled is true.
+// matchIfMissing = true means it IS enabled by default, so normal runs are unaffected
+// Integration tests set it to false to avoid racing with the tests
+// Tests drive the lifecycle by itself instead.
 @Service
+@ConditionalOnProperty(name = "bidforge.scheduler.enabled", havingValue = "true", matchIfMissing = true)
 public class AuctionSchedulerService {
 
     private static final Logger log = LoggerFactory.getLogger(AuctionSchedulerService.class);
