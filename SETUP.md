@@ -2,8 +2,9 @@
 
 ## Prerequisites
 
-JDK 21+ Oracle database (Docker or existing)
-Docker (for the Docker setup and integration tests)
+- JDK 21+
+- Oracle database (Docker or existing)
+- Docker (for the Docker setup and integration tests)
 
 ---
 
