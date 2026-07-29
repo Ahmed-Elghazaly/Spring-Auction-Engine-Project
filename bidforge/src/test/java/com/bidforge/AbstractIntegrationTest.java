@@ -12,7 +12,7 @@ import org.testcontainers.utility.DockerImageName;
 // Base class for every integration test, it boots the real application against a real Oracle database running in Docker
 
 @SpringBootTest
-@ActiveProfiles("integration")
+@ActiveProfiles("test")
 @Testcontainers
 public abstract class AbstractIntegrationTest {
 

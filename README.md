@@ -1,7 +1,13 @@
+# BidForge — Secure Multi-Format Auction Engine
+
+**How to run it: [SETUP.md](SETUP.md)**
+
+---
 
 ## Project Overview
 
-It allows users to create auctions, place bids, track their activity, and determine winners automatically. It also gives administrators tools to manage users, oversee auctions, and review a complete audit trail.
+It allows users to create auctions, place bids, track their activity, and determine winners automatically. It also gives
+administrators tools to manage users, oversee auctions, and review a complete audit trail.
 
 The system supports both public browsing and protected operations through JWT authentication.
 
@@ -54,11 +60,11 @@ The system supports both public browsing and protected operations through JWT au
 
 ```mermaid
 stateDiagram-v2
-    [*] --> SCHEDULED : Auction created
-    SCHEDULED --> OPEN : Start time reached or manual open
-    SCHEDULED --> CANCELLED : Owner or admin cancels
-    OPEN --> CLOSED : End time reached or manual close
-    OPEN --> CANCELLED : Admin cancels
+    [*] --> SCHEDULED: Auction created
+    SCHEDULED --> OPEN: Start time reached or manual open
+    SCHEDULED --> CANCELLED: Owner or admin cancels
+    OPEN --> CLOSED: End time reached or manual close
+    OPEN --> CANCELLED: Admin cancels
 ```
 
 ### Lifecycle Rules
@@ -182,25 +188,25 @@ Protected operations require a valid JWT belonging to an enabled account.
 
 ## Authentication and Profile
 
-| Method | Endpoint | Access | Purpose |
-|---|---|---|---|
-| `POST` | `/api/auth/register` | Public | Register a normal user account. |
-| `POST` | `/api/auth/login` | Public | Authenticate and receive a JWT. |
-| `GET` | `/api/users/me` | Authenticated | View the logged-in user's profile. |
+| Method | Endpoint             | Access        | Purpose                            |
+|--------|----------------------|---------------|------------------------------------|
+| `POST` | `/api/auth/register` | Public        | Register a normal user account.    |
+| `POST` | `/api/auth/login`    | Public        | Authenticate and receive a JWT.    |
+| `GET`  | `/api/users/me`      | Authenticated | View the logged-in user's profile. |
 
 ## Auctions
 
-| Method | Endpoint | Access | Purpose |
-|---|---|---|---|
-| `POST` | `/api/auctions` | Authenticated | Create a scheduled auction. |
-| `GET` | `/api/auctions` | Public | Browse and search auctions. |
-| `GET` | `/api/auctions/mine` | Authenticated | View auctions created by the logged-in user. |
-| `GET` | `/api/auctions/won` | Authenticated | View auctions won by the logged-in user. |
-| `GET` | `/api/auctions/{id}` | Public | View full auction details and result when closed. |
-| `PUT` | `/api/auctions/{id}` | Owner | Edit a scheduled auction. |
-| `POST` | `/api/auctions/{id}/open` | Owner or admin | Open a scheduled auction. |
-| `POST` | `/api/auctions/{id}/close` | Owner or admin | Close an open auction and determine the winner. |
-| `POST` | `/api/auctions/{id}/cancel` | Owner or admin | Cancel an auction according to state rules. |
+| Method | Endpoint                    | Access         | Purpose                                           |
+|--------|-----------------------------|----------------|---------------------------------------------------|
+| `POST` | `/api/auctions`             | Authenticated  | Create a scheduled auction.                       |
+| `GET`  | `/api/auctions`             | Public         | Browse and search auctions.                       |
+| `GET`  | `/api/auctions/mine`        | Authenticated  | View auctions created by the logged-in user.      |
+| `GET`  | `/api/auctions/won`         | Authenticated  | View auctions won by the logged-in user.          |
+| `GET`  | `/api/auctions/{id}`        | Public         | View full auction details and result when closed. |
+| `PUT`  | `/api/auctions/{id}`        | Owner          | Edit a scheduled auction.                         |
+| `POST` | `/api/auctions/{id}/open`   | Owner or admin | Open a scheduled auction.                         |
+| `POST` | `/api/auctions/{id}/close`  | Owner or admin | Close an open auction and determine the winner.   |
+| `POST` | `/api/auctions/{id}/cancel` | Owner or admin | Cancel an auction according to state rules.       |
 
 ### Auction Search Parameters
 
@@ -222,37 +228,37 @@ GET /api/auctions?status=OPEN&type=ENGLISH&category=ART&q=painting&page=0&size=2
 
 ## Bids
 
-| Method | Endpoint | Access | Purpose |
-|---|---|---|---|
-| `POST` | `/api/auctions/{auctionId}/bids` | Authenticated | Place a bid. |
-| `GET` | `/api/auctions/{auctionId}/bids` | Public with visibility rules | View auction bids. |
-| `GET` | `/api/bids/my` | Authenticated | View bids placed by the logged-in user. |
+| Method | Endpoint                         | Access                       | Purpose                                 |
+|--------|----------------------------------|------------------------------|-----------------------------------------|
+| `POST` | `/api/auctions/{auctionId}/bids` | Authenticated                | Place a bid.                            |
+| `GET`  | `/api/auctions/{auctionId}/bids` | Public with visibility rules | View auction bids.                      |
+| `GET`  | `/api/bids/my`                   | Authenticated                | View bids placed by the logged-in user. |
 
 ### Bid Visibility
 
-| Situation | Anonymous Visitor | Logged-In User |
-|---|---|---|
-| English auction | All bids | All bids |
-| Active sealed auction | No bids | Only their own bid |
-| Closed sealed auction | All bids | All bids |
-| Cancelled sealed auction | No bids | Only their own bid |
+| Situation                | Anonymous Visitor | Logged-In User     |
+|--------------------------|-------------------|--------------------|
+| English auction          | All bids          | All bids           |
+| Active sealed auction    | No bids           | Only their own bid |
+| Closed sealed auction    | All bids          | All bids           |
+| Cancelled sealed auction | No bids           | Only their own bid |
 
 ## Administration
 
-| Method | Endpoint | Access | Purpose |
-|---|---|---|---|
-| `GET` | `/api/admin/users` | Admin | List all users. |
-| `PATCH` | `/api/admin/users/{id}/status` | Admin | Enable or disable a user. |
-| `GET` | `/api/admin/auctions` | Admin | Search all auctions, including by seller. |
-| `GET` | `/api/admin/audit-events` | Admin | Read and filter the audit trail. |
+| Method  | Endpoint                       | Access | Purpose                                   |
+|---------|--------------------------------|--------|-------------------------------------------|
+| `GET`   | `/api/admin/users`             | Admin  | List all users.                           |
+| `PATCH` | `/api/admin/users/{id}/status` | Admin  | Enable or disable a user.                 |
+| `GET`   | `/api/admin/auctions`          | Admin  | Search all auctions, including by seller. |
+| `GET`   | `/api/admin/audit-events`      | Admin  | Read and filter the audit trail.          |
 
 ## API Documentation
 
-| Method | Endpoint | Access | Purpose |
-|---|---|---|---|
-| `GET` | `/swagger-ui.html` | Public | Open Swagger UI. |
-| `GET` | `/swagger-ui/**` | Public | Swagger UI resources. |
-| `GET` | `/v3/api-docs/**` | Public | OpenAPI specification. |
+| Method | Endpoint           | Access | Purpose                |
+|--------|--------------------|--------|------------------------|
+| `GET`  | `/swagger-ui.html` | Public | Open Swagger UI.       |
+| `GET`  | `/swagger-ui/**`   | Public | Swagger UI resources.  |
+| `GET`  | `/v3/api-docs/**`  | Public | OpenAPI specification. |
 
 ---
 
@@ -303,3 +309,7 @@ Administrators can filter the audit trail by actor, entity type, and entity ID.
 
 ---
 
+## Setup and Running
+
+See **[SETUP.md](SETUP.md)** for prerequisites, running with or without Docker, configuration profiles, tests, the
+Postman collection, environment variables and troubleshooting.

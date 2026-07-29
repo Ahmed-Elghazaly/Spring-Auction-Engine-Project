@@ -8,6 +8,7 @@ import com.bidforge.entity.enums.RoleName;
 import com.bidforge.repository.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -20,11 +21,20 @@ import java.time.temporal.ChronoUnit;
 // Seeded admin account: admin / Admin@123
 // Seeded user accounts: seller1, bidder1, bidder2 / Password@123
 
+// ROLES are reference data the application cannot run without, so they are always seeded, in every profile
+
+// The demo accounts and sample auctions are development conveniences with publicly known passwords so they are seeded ONLY when
+// bidforge.seed.demo-data is true (dev profile), The prod profile sets it to false so a real deployment can never hand out an admin login.
+
 @Component
 public class SeedDataRunner implements CommandLineRunner {
 
     private static final Logger log = LoggerFactory.getLogger(SeedDataRunner.class);
     private static final String DEMO_PASSWORD = "Password@123";
+
+    // Defaults to false: if a profile forgets to mention it, the SAFE option wins.
+    @Value("${bidforge.seed.demo-data:false}")
+    private boolean seedDemoData;
 
     private final RoleRepository roleRepository;
     private final UserRepository userRepository;
@@ -51,6 +61,12 @@ public class SeedDataRunner implements CommandLineRunner {
     @Transactional
     public void run(String... args) {
         seedRoles();
+
+        if (!seedDemoData) {
+            log.info("Demo data seeding is disabled (bidforge.seed.demo-data=false)");
+            return;
+        }
+
         seedAdmin();
         seedDemoUsers();
         seedDemoAuctions();
