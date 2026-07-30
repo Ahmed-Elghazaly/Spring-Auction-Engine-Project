@@ -1,0 +1,42 @@
+.bf-browse__head {
+  margin-bottom: 16px;
+}
+
+.bf-browse__title {
+  margin: 0;
+  font-size: 1.7rem;
+  font-weight: 500;
+}
+
+.bf-browse__sub {
+  margin: 2px 0 0;
+  font-size: 0.9rem;
+}
+
+.bf-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-start;
+  margin-bottom: 8px;
+
+  mat-form-field {
+    flex: 1 1 170px;
+    min-width: 150px;
+  }
+}
+
+.bf-filters__search {
+  flex: 2 1 260px !important;
+}
+
+.bf-filters__clear {
+  margin-top: 8px;
+  height: 46px;
+}
+
+.bf-paginator {
+  margin-top: 24px;
+  background: transparent;
+  border-top: 1px solid var(--mat-sys-outline-variant);
+}

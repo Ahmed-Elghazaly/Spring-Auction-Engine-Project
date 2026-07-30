@@ -309,7 +309,3 @@ Administrators can filter the audit trail by actor, entity type, and entity ID.
 
 ---
 
-## Setup and Running
-
-See **[SETUP.md](SETUP.md)** for prerequisites, running with or without Docker, configuration profiles, tests, the
-Postman collection, environment variables and troubleshooting.

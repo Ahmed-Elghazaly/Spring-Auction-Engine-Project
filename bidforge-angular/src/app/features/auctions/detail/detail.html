@@ -1,0 +1,290 @@
+<div class="bf-container bf-page">
+  @if (loading()) {
+    <div class="bf-skeleton bf-detail__skeleton"></div>
+  } @else if (notFound() || !auction()) {
+    <div class="bf-detail__missing">
+      <mat-icon class="bf-detail__missing-icon">search_off</mat-icon>
+      <h1>Auction not found</h1>
+      <p class="bf-muted">It may have been removed, or the link may be wrong.</p>
+      <a mat-flat-button routerLink="/auctions">Browse auctions</a>
+    </div>
+  } @else {
+    @let a = auction()!;
+
+    <a routerLink="/auctions" class="bf-detail__back">
+      <mat-icon>arrow_back</mat-icon>
+      All auctions
+    </a>
+
+    <header
+      class="bf-detail__hero"
+      [style.background]="'color-mix(in srgb, ' + visual()!.color + ' 14%, transparent)'"
+    >
+      <mat-icon class="bf-detail__hero-icon" [style.color]="visual()!.color">
+        {{ visual()!.icon }}
+      </mat-icon>
+      <div class="bf-detail__hero-text">
+        <span class="bf-detail__category" [style.color]="visual()!.color">
+          {{ categoryLabel() }}
+        </span>
+        <h1 class="bf-detail__title">{{ a.title }}</h1>
+        <div class="bf-detail__badges">
+          <app-status-chip [status]="a.status" />
+          <span class="bf-detail__type" [matTooltip]="typeHints[a.auctionType]">
+            <mat-icon>{{ isSealed() ? 'lock' : 'gavel' }}</mat-icon>
+            {{ typeLabels[a.auctionType] }}
+          </span>
+          <app-countdown [status]="a.status" [startTime]="a.startTime" [endTime]="a.endTime" />
+        </div>
+      </div>
+    </header>
+
+    <div class="bf-detail__columns">
+
+      <div class="bf-detail__main">
+        <mat-card appearance="outlined">
+          <mat-card-content>
+            <h2 class="bf-detail__section">Description</h2>
+            <p class="bf-detail__description">
+              {{ a.description || 'The seller did not add a description.' }}
+            </p>
+
+            <mat-divider />
+
+            <dl class="bf-detail__facts">
+              <div><dt>Seller</dt><dd>{{ a.sellerUsername }}</dd></div>
+              <div><dt>Starting price</dt><dd>{{ a.startingPrice | currency: 'USD' }}</dd></div>
+
+              @if (a.minIncrement != null) {
+                <div><dt>Minimum increment</dt><dd>{{ a.minIncrement | currency: 'USD' }}</dd></div>
+              }
+              <div><dt>Opens</dt><dd>{{ a.startTime | date: 'medium' }}</dd></div>
+              <div><dt>Closes</dt><dd>{{ a.endTime | date: 'medium' }}</dd></div>
+            </dl>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card appearance="outlined" class="bf-detail__bids">
+          <mat-card-content>
+            <h2 class="bf-detail__section">
+              Bids
+              @if (!isSealed() || isClosed()) {
+                <span class="bf-muted bf-detail__bid-count">({{ bids().totalElements }})</span>
+              }
+            </h2>
+
+            @if (bidListNote(); as note) {
+              <p class="bf-detail__sealed-note">
+                <mat-icon>lock</mat-icon>
+                {{ note }}
+              </p>
+            }
+
+            @if (bids().content.length === 0) {
+              <p class="bf-muted bf-detail__no-bids">
+                @if (isSealed() && !isClosed()) {
+                  No bid from you yet.
+                } @else if (isOpen()) {
+                  No bids have been placed yet — be the first.
+                } @else {
+                  No bids were placed on this auction.
+                }
+              </p>
+            } @else {
+              <ol class="bf-bid-list">
+                @for (bid of bids().content; track bid.id; let first = $first) {
+                  <li class="bf-bid" [class.bf-bid--leading]="first && !isSealed()">
+                    <span class="bf-bid__who">
+                      <mat-icon>person</mat-icon>
+                      {{ bid.bidderUsername }}
+                      @if (bid.bidderUsername === auth.username()) {
+                        <span class="bf-bid__you">you</span>
+                      }
+                    </span>
+                    <span class="bf-bid__amount bf-tabular">{{ bid.amount | currency: 'USD' }}</span>
+                    <span class="bf-bid__when bf-muted">{{ bid.createdAt | date: 'short' }}</span>
+                  </li>
+                }
+              </ol>
+            }
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <aside class="bf-detail__side">
+
+        <mat-card appearance="outlined" class="bf-detail__panel">
+          @if (busy()) {
+            <mat-progress-bar mode="indeterminate" />
+          }
+          <mat-card-content>
+            @if (isSealed()) {
+              <span class="bf-muted bf-detail__price-label">Starting price</span>
+              <strong class="bf-detail__price bf-tabular">
+                {{ a.startingPrice | currency: 'USD' }}
+              </strong>
+              <p class="bf-muted bf-detail__price-hint">
+                Nobody — not even the seller — can see the bids until this auction closes.
+              </p>
+            } @else {
+              <span class="bf-muted bf-detail__price-label">
+                {{ hasHighestBid() ? 'Current highest bid' : 'Starting price' }}
+              </span>
+              <strong class="bf-detail__price bf-tabular">
+                {{ displayPrice() | currency: 'USD' }}
+              </strong>
+            }
+
+            @if (minimumBidLabel(); as label) {
+              <p class="bf-detail__minimum">
+                {{ label }}
+                <strong class="bf-tabular">{{ minimumBid()! | currency: 'USD' }}</strong>
+              </p>
+            }
+
+            <mat-divider />
+
+            @if (mySealedBid(); as mine) {
+              <div class="bf-detail__mybid">
+                <mat-icon>verified</mat-icon>
+                <div>
+                  <span class="bf-muted">Your sealed bid</span>
+                  <strong class="bf-tabular">{{ mine.amount | currency: 'USD' }}</strong>
+                </div>
+              </div>
+            }
+
+            @if (canBid()) {
+              <form class="bf-detail__bidform" [formGroup]="bidForm" (ngSubmit)="placeBid()">
+                <mat-form-field appearance="outline">
+                  <mat-label>Your bid</mat-label>
+                  <span matTextPrefix>$&nbsp;</span>
+                  <input
+                    matInput
+                    type="number"
+                    step="0.01"
+                    formControlName="amount"
+                    [attr.min]="minimumBid()"
+                    placeholder="0.00"
+                  />
+                  @if (bidForm.controls.amount.hasError('required')) {
+                    <mat-error>Enter an amount</mat-error>
+                  } @else if (bidForm.controls.amount.hasError('min')) {
+                    <mat-error>Must be at least $0.01</mat-error>
+                  }
+                </mat-form-field>
+
+                <button
+                  mat-stroked-button
+                  type="button"
+                  class="bf-detail__usemin"
+                  (click)="useMinimumBid()"
+                >
+                  Use minimum ({{ minimumBid()! | currency: 'USD' }})
+                </button>
+
+                <button mat-flat-button type="submit" class="bf-detail__bidbtn" [disabled]="busy()">
+                  <mat-icon>gavel</mat-icon>
+                  {{ isSealed() ? 'Submit sealed bid' : 'Place bid' }}
+                </button>
+
+                @if (isSealed()) {
+                  <p class="bf-muted bf-detail__final-warning">
+                    You only get one sealed bid and it cannot be changed.
+                  </p>
+                }
+              </form>
+            } @else {
+              <p class="bf-detail__blocked">
+                <mat-icon>info</mat-icon>
+                {{ bidBlockedReason() }}
+              </p>
+              @if (!auth.isLoggedIn()) {
+                <a mat-flat-button routerLink="/login" class="bf-detail__signin">Sign in</a>
+              }
+            }
+          </mat-card-content>
+        </mat-card>
+
+        @if (isClosed() && a.result) {
+          <mat-card appearance="outlined" class="bf-detail__result">
+            <mat-card-content>
+              <h2 class="bf-detail__section">
+                <mat-icon>emoji_events</mat-icon>
+                Result
+              </h2>
+              @if (a.result.winnerUsername) {
+                <p class="bf-detail__winner">
+                  Won by <strong>{{ a.result.winnerUsername }}</strong>
+                </p>
+                <strong class="bf-detail__price bf-tabular">
+                  {{ a.result.finalPrice | currency: 'USD' }}
+                </strong>
+              } @else {
+                <p class="bf-muted">This auction closed without any bids.</p>
+              }
+              <p class="bf-muted bf-detail__closed-at">
+                Closed {{ a.result.closedAt | date: 'medium' }}
+              </p>
+            </mat-card-content>
+          </mat-card>
+        }
+
+        @if (canManage()) {
+          <mat-card appearance="outlined" class="bf-detail__manage">
+            <mat-card-content>
+              <h2 class="bf-detail__section">
+                <mat-icon>settings</mat-icon>
+                Manage
+              </h2>
+              <p class="bf-muted bf-detail__manage-hint">
+                @if (isSeller()) {
+                  You are the seller of this auction.
+                } @else {
+                  You are acting as an administrator.
+                }
+              </p>
+
+              @let allowed = actions()!;
+              <div class="bf-detail__manage-actions">
+                @if (allowed.canEdit) {
+                  <a mat-stroked-button [routerLink]="['/auctions', a.id, 'edit']">
+                    <mat-icon>edit</mat-icon>
+                    Edit
+                  </a>
+                }
+                @if (allowed.canOpen) {
+                  <button mat-flat-button type="button" [disabled]="busy()" (click)="openAuction()">
+                    <mat-icon>play_arrow</mat-icon>
+                    Open now
+                  </button>
+                }
+                @if (allowed.canClose) {
+                  <button mat-flat-button type="button" [disabled]="busy()" (click)="closeAuction()">
+                    <mat-icon>flag</mat-icon>
+                    Close now
+                  </button>
+                }
+                @if (allowed.canCancel) {
+                  <button
+                    mat-stroked-button
+                    type="button"
+                    class="bf-detail__danger"
+                    [disabled]="busy()"
+                    (click)="cancelAuction()"
+                  >
+                    <mat-icon>block</mat-icon>
+                    Cancel
+                  </button>
+                }
+                @if (a.status === 'CLOSED' || a.status === 'CANCELLED') {
+                  <p class="bf-muted">This auction has ended — no further actions are possible.</p>
+                }
+              </div>
+            </mat-card-content>
+          </mat-card>
+        }
+      </aside>
+    </div>
+  }
+</div>

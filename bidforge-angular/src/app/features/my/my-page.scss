@@ -1,0 +1,90 @@
+.bf-my-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.bf-my-header__title {
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.bf-my-header__subtitle {
+  margin: 0.25rem 0 0;
+  font-size: 0.9rem;
+}
+
+.bf-my-tallies {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.bf-my-tally {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  padding: 0.35rem 0.8rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  background: var(--mat-sys-surface-container);
+  color: var(--mat-sys-on-surface-variant);
+
+  strong {
+    font-size: 0.95rem;
+    font-weight: 600;
+  }
+
+  &[data-status='OPEN'] {
+    background: var(--bf-status-open-bg);
+    color: var(--bf-status-open);
+  }
+
+  &[data-status='SCHEDULED'] {
+    background: var(--bf-status-scheduled-bg);
+    color: var(--bf-status-scheduled);
+  }
+
+  &[data-status='CLOSED'] {
+    background: var(--bf-status-closed-bg);
+    color: var(--bf-status-closed);
+  }
+
+  &[data-status='CANCELLED'] {
+    background: var(--bf-status-cancelled-bg);
+    color: var(--bf-status-cancelled);
+  }
+}
+
+.bf-my-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.bf-my-item__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+
+  a,
+  button {
+    --mat-button-outlined-horizontal-padding: 0.7rem;
+    font-size: 0.8rem;
+  }
+}
+
+.bf-my-item__danger {
+  color: var(--mat-sys-error);
+}
+
+mat-paginator {
+  margin-top: 1.5rem;
+  background: transparent;
+}

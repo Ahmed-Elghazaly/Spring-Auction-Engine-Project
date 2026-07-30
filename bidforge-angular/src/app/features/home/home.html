@@ -1,0 +1,76 @@
+<section class="bf-hero">
+  <div class="bf-container bf-hero__inner">
+    <div class="bf-hero__copy">
+      <span class="bf-hero__eyebrow">Multi-format auction engine</span>
+      <h1 class="bf-hero__title">Bid on anything. Openly, or in secret.</h1>
+      <p class="bf-hero__lead">
+        BidForge runs two kinds of auction: <strong>English</strong>, where everyone
+        sees the price climb, and <strong>sealed-bid</strong>, where each bid stays
+        secret until the hammer falls. Auctions open and close on schedule, and the
+        winner is decided automatically.
+      </p>
+
+      <div class="bf-hero__actions">
+        <a mat-flat-button routerLink="/auctions" class="bf-hero__cta">
+          <mat-icon>storefront</mat-icon>
+          Browse auctions
+        </a>
+        @if (auth.isLoggedIn()) {
+          <a mat-stroked-button routerLink="/auctions/new">
+            <mat-icon>add_circle</mat-icon>
+            Sell an item
+          </a>
+        } @else {
+          <a mat-stroked-button routerLink="/register">Create an account</a>
+        }
+      </div>
+    </div>
+
+    @if (!auth.isLoggedIn()) {
+      <aside class="bf-hero__demo" aria-label="Demo accounts">
+        <h2 class="bf-hero__demo-title">
+          <mat-icon>vpn_key</mat-icon>
+          Demo accounts
+        </h2>
+        <dl class="bf-hero__demo-list">
+          <div><dt>admin</dt><dd>Admin&#64;123</dd></div>
+          <div><dt>seller1</dt><dd>Password&#64;123</dd></div>
+          <div><dt>bidder1</dt><dd>Password&#64;123</dd></div>
+          <div><dt>bidder2</dt><dd>Password&#64;123</dd></div>
+        </dl>
+        <a mat-button routerLink="/login" class="bf-hero__demo-link">Sign in →</a>
+      </aside>
+    }
+  </div>
+</section>
+
+<section class="bf-container bf-page">
+  <header class="bf-section-head">
+    <div>
+      <h2 class="bf-section-head__title">Closing soon</h2>
+      <p class="bf-muted bf-section-head__sub">Live auctions, the ones ending first.</p>
+    </div>
+    <a mat-button routerLink="/auctions">
+      View all
+      <mat-icon iconPositionEnd>arrow_forward</mat-icon>
+    </a>
+  </header>
+
+  @if (loading()) {
+    <app-skeleton-grid [count]="4" />
+  } @else if (auctions().length === 0) {
+    <app-empty-state
+      icon="hourglass_empty"
+      title="No auctions are open right now"
+      message="Scheduled auctions open automatically when their start time arrives."
+    >
+      <a mat-flat-button routerLink="/auctions">Browse everything</a>
+    </app-empty-state>
+  } @else {
+    <div class="bf-grid">
+      @for (auction of auctions(); track auction.id) {
+        <app-auction-card [auction]="auction" />
+      }
+    </div>
+  }
+</section>

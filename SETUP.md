@@ -1,10 +1,14 @@
 # BidForge — Setup & Run
 
+Two parts: the Spring Boot API (`bidforge/`, port 8080) and the Angular app (`bidforge-angular/`, port 4200). Sections
+1–7 cover the backend, section 8 the frontend.
+
 ## Prerequisites
 
 - JDK 21+
 - Oracle database (Docker or existing)
 - Docker (for the Docker setup and integration tests)
+- Node.js 20.19+ / 22.12+ (frontend only)
 
 ---
 
@@ -129,15 +133,20 @@ npx newman run docs/BidForge.postman_collection.json   # 53 requests, 82 asserti
 
 ## 6. Demo accounts (dev profile only)
 
-| Username                          | Password       | Role  |
-|-----------------------------------|----------------|-------|
-| `admin`                           | `Admin@123`    | ADMIN |
-| `seller1` / `bidder1` / `bidder2` | `Password@123` | USER  |
+| Username  | Password       | Role  | Used in the sample data as                        |
+|-----------|----------------|-------|---------------------------------------------------|
+| `admin`   | `Admin@123`    | ADMIN | Administrator                                     |
+| `sara`    | `Password@123` | USER  | Seller                                            |
+| `omar`    | `Password@123` | USER  | Seller                                            |
+| `layla`   | `Password@123` | USER  | Bidder (winning, outbid, sealed and won auctions) |
+| `youssef` | `Password@123` | USER  | Bidder                                            |
+
+Seven sample auctions are seeded: one scheduled, three open, two closed with winners, one cancelled.
 
 ```bash
 curl -X POST http://localhost:8080/api/auth/login \
   -H 'Content-Type: application/json' \
-  -d '{"username":"bidder1","password":"Password@123"}'
+  -d '{"username":"layla","password":"Password@123"}'
 ```
 
 ---
@@ -154,6 +163,34 @@ curl -X POST http://localhost:8080/api/auth/login \
 | `JWT_EXPIRATION_MS`      | no          | `86400000`                                  |
 | `CORS_ALLOWED_ORIGINS`   | no          | `http://localhost:4200`                     |
 | `SPRING_PROFILES_ACTIVE` | no          | `dev`                                       |
+
+---
+
+## 8. Angular frontend
+
+Start the backend first (sections 1–2) — the app calls it at `http://localhost:8080/api`.
+
+```bash
+cd bidforge-angular
+npm install
+npm start
+```
+
+App -> http://localhost:4200
+
+Sign in with the demo accounts from section 6; the login page lists them as one-click buttons.
+
+**Production build:**
+
+```bash
+npm run build     # output in dist/bidforge-angular/browser
+```
+
+The two run as separate servers and talk over CORS, which the backend already allows for
+`http://localhost:4200`. To use a different API address, edit `apiBaseUrl` in
+`src/environments/environment.development.ts`.
+
+More detail — screen map, architecture, troubleshooting — in `bidforge-angular/README.md`.
 
 ---
 

@@ -1,0 +1,153 @@
+.bf-form-page {
+  max-width: 780px;
+}
+
+.bf-form-page__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: 1rem;
+  color: var(--mat-sys-primary);
+  text-decoration: none;
+  font-size: 0.9rem;
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  mat-icon {
+    font-size: 1.1rem;
+    width: 1.1rem;
+    height: 1.1rem;
+  }
+}
+
+.bf-form-page__card {
+  overflow: hidden;
+}
+
+.bf-form-page__header {
+  padding-top: 1.25rem;
+}
+
+.bf-form-page__blocked {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  padding: 1.25rem 0 0.5rem;
+
+  mat-icon {
+    color: var(--mat-sys-outline);
+    flex: none;
+  }
+
+  p {
+    margin: 0 0 1rem;
+    line-height: 1.6;
+  }
+}
+
+.bf-auction-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding-top: 0.75rem;
+
+  mat-divider {
+    margin: 1.25rem 0;
+  }
+}
+
+.bf-auction-form__section {
+  margin: 0 0 0.9rem;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.bf-auction-form__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 1rem;
+
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.bf-auction-form__hint {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+  margin: 0 0 1rem;
+  color: var(--mat-sys-on-surface-variant);
+  font-size: 0.85rem;
+  line-height: 1.5;
+
+  mat-icon {
+    font-size: 1.05rem;
+    width: 1.05rem;
+    height: 1.05rem;
+    flex: none;
+    margin-top: 0.1rem;
+  }
+}
+
+.bf-auction-form__locked {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  padding: 0.85rem 1rem;
+  margin-bottom: 1rem;
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 12px;
+  background: var(--mat-sys-surface-container-low);
+
+  mat-icon {
+    color: var(--mat-sys-outline);
+    flex: none;
+  }
+
+  span {
+    display: block;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  strong {
+    display: block;
+    font-size: 1rem;
+  }
+
+  p {
+    margin: 0.35rem 0 0;
+    font-size: 0.82rem;
+  }
+}
+
+.bf-auction-form__crosserror {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+  margin: -0.5rem 0 1rem;
+  color: var(--mat-sys-error);
+  font-size: 0.85rem;
+
+  mat-icon {
+    font-size: 1.05rem;
+    width: 1.05rem;
+    height: 1.05rem;
+  }
+}
+
+.bf-auction-form__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+
+  @media (max-width: 480px) {
+    flex-direction: column-reverse;
+  }
+}

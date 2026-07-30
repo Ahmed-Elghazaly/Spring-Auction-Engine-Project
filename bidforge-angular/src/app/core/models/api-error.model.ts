@@ -1,0 +1,37 @@
+export interface ApiError {
+  timestamp: string;
+
+  status: number;
+
+  error: string;
+
+  message: string;
+
+  path: string;
+
+  fieldErrors?: FieldValidationError[];
+}
+
+export interface FieldValidationError {
+  field: string;
+
+  message: string;
+}
+
+export const ApiErrorCode = {
+  RESOURCE_NOT_FOUND: 'RESOURCE_NOT_FOUND',
+  DUPLICATE_RESOURCE: 'DUPLICATE_RESOURCE',
+  INVALID_AUCTION_STATE: 'INVALID_AUCTION_STATE',
+  SEALED_BID_ALREADY_PLACED: 'SEALED_BID_ALREADY_PLACED',
+  SELLER_CANNOT_BID: 'SELLER_CANNOT_BID',
+  BID_TOO_LOW: 'BID_TOO_LOW',
+  BUSINESS_RULE_VIOLATION: 'BUSINESS_RULE_VIOLATION',
+  NOT_RESOURCE_OWNER: 'NOT_RESOURCE_OWNER',
+  VALIDATION_FAILED: 'VALIDATION_FAILED',
+  MALFORMED_REQUEST: 'MALFORMED_REQUEST',
+  UNAUTHORIZED: 'UNAUTHORIZED',
+  INVALID_CREDENTIALS: 'INVALID_CREDENTIALS',
+  ACCOUNT_DISABLED: 'ACCOUNT_DISABLED',
+  FORBIDDEN: 'FORBIDDEN',
+  INTERNAL_ERROR: 'INTERNAL_ERROR',
+} as const;

@@ -1,0 +1,102 @@
+<div class="bf-container bf-page">
+  <header class="bf-browse__head">
+    <div>
+      <h1 class="bf-browse__title">Auctions</h1>
+      <p class="bf-muted bf-browse__sub">
+        @if (!loading()) {
+          {{ result().totalElements }}
+          {{ result().totalElements === 1 ? 'auction' : 'auctions' }} found
+        } @else {
+          Loading auctions…
+        }
+      </p>
+    </div>
+  </header>
+
+  <section class="bf-filters" aria-label="Filter auctions">
+    <mat-form-field appearance="outline" class="bf-filters__search">
+      <mat-label>Search by title</mat-label>
+      <input matInput [formControl]="searchControl" placeholder="e.g. camera" />
+      <mat-icon matPrefix>search</mat-icon>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Status</mat-label>
+
+      <mat-select [value]="status()" (valueChange)="status.set($event); onFilterChange()">
+        <mat-option [value]="undefined">Any status</mat-option>
+        @for (option of statuses; track option) {
+          <mat-option [value]="option">{{ statusLabels[option] }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Type</mat-label>
+      <mat-select [value]="type()" (valueChange)="type.set($event); onFilterChange()">
+        <mat-option [value]="undefined">Any type</mat-option>
+        @for (option of types; track option) {
+          <mat-option [value]="option">{{ typeLabels[option] }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Category</mat-label>
+      <mat-select [value]="category()" (valueChange)="category.set($event); onFilterChange()">
+        <mat-option [value]="undefined">Any category</mat-option>
+        @for (option of categories; track option) {
+          <mat-option [value]="option">{{ categoryLabels[option] }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Sort by</mat-label>
+      <mat-select [value]="sort()" (valueChange)="sort.set($event); onFilterChange()">
+        @for (option of sortOptions; track option.value) {
+          <mat-option [value]="option.value">{{ option.label }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    @if (hasActiveFilters()) {
+      <button mat-stroked-button type="button" (click)="clearFilters()" class="bf-filters__clear">
+        <mat-icon>filter_alt_off</mat-icon>
+        Clear
+      </button>
+    }
+  </section>
+
+  @if (loading()) {
+    <app-skeleton-grid [count]="8" />
+  } @else if (result().empty) {
+    <app-empty-state
+      icon="search_off"
+      title="No auctions match your filters"
+      message="Try widening your search — remove a filter or clear them all."
+    >
+      @if (hasActiveFilters()) {
+        <button mat-flat-button type="button" (click)="clearFilters()">Clear filters</button>
+      } @else {
+        <a mat-flat-button routerLink="/auctions/new">Create the first auction</a>
+      }
+    </app-empty-state>
+  } @else {
+    <div class="bf-grid">
+      @for (auction of result().content; track auction.id) {
+        <app-auction-card [auction]="auction" />
+      }
+    </div>
+
+    <mat-paginator
+      class="bf-paginator"
+      [length]="result().totalElements"
+      [pageIndex]="result().number"
+      [pageSize]="result().size"
+      [pageSizeOptions]="[12, 24, 48]"
+      (page)="onPageChange($event)"
+      aria-label="Select page of auctions"
+    />
+  }
+</div>

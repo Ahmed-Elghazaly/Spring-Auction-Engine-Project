@@ -1,0 +1,99 @@
+<div class="bf-container bf-page">
+  <header class="bf-my-header">
+    <div>
+      <h1 class="bf-my-header__title">My bids</h1>
+      <p class="bf-muted bf-my-header__subtitle">
+        Every bid you have placed, newest first.
+      </p>
+    </div>
+    <a mat-stroked-button routerLink="/auctions">
+      <mat-icon>storefront</mat-icon>
+      Find something to bid on
+    </a>
+  </header>
+
+  @if (leadingCount() > 0) {
+    <div class="bf-my-tallies">
+      <span class="bf-my-tally" data-status="OPEN">
+        <strong class="bf-tabular">{{ leadingCount() }}</strong>
+        currently leading
+      </span>
+    </div>
+  }
+
+  @if (loading()) {
+    <div class="bf-skeleton bf-table-skeleton"></div>
+  } @else if (result().content.length === 0) {
+    <app-empty-state
+      icon="gavel"
+      title="You have not bid on anything yet"
+      message="When you place a bid it appears here, along with whether you are still in the lead."
+    >
+      <a mat-flat-button routerLink="/auctions">
+        <mat-icon>storefront</mat-icon>
+        Browse auctions
+      </a>
+    </app-empty-state>
+  } @else {
+    <div class="bf-table-wrap">
+
+      <table mat-table [dataSource]="result().content" class="bf-table">
+
+        <ng-container matColumnDef="auction">
+          <th mat-header-cell *matHeaderCellDef>Auction</th>
+          <td mat-cell *matCellDef="let bid">
+            <a [routerLink]="['/auctions', bid.auctionId]" class="bf-table__link">
+              {{ bid.auctionTitle }}
+            </a>
+            <span class="bf-muted bf-table__sub">{{ typeLabel(bid) }}</span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="amount">
+          <th mat-header-cell *matHeaderCellDef class="bf-table__right">Your bid</th>
+          <td mat-cell *matCellDef="let bid" class="bf-table__right bf-tabular">
+            <strong>{{ bid.amount | currency: 'USD' }}</strong>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="placed">
+          <th mat-header-cell *matHeaderCellDef>Placed</th>
+          <td mat-cell *matCellDef="let bid" class="bf-muted">
+            {{ bid.createdAt | date: 'short' }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="status">
+
+          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <td mat-cell *matCellDef="let bid">
+            <app-status-chip [status]="bid.auctionStatus" />
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="outcome">
+          <th mat-header-cell *matHeaderCellDef>Standing</th>
+          <td mat-cell *matCellDef="let bid">
+            @let outcome = describe(bid);
+            <span class="bf-outcome" [attr.data-tone]="outcome.tone" [matTooltip]="outcome.tooltip">
+              <mat-icon>{{ outcome.icon }}</mat-icon>
+              {{ outcome.label }}
+            </span>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="columns"></tr>
+        <tr mat-row *matRowDef="let row; columns: columns"></tr>
+      </table>
+    </div>
+
+    <mat-paginator
+      [length]="result().totalElements"
+      [pageIndex]="pageIndex()"
+      [pageSize]="pageSize()"
+      [pageSizeOptions]="[15, 30, 50]"
+      (page)="onPageChange($event)"
+      aria-label="Select page of your bids"
+    />
+  }
+</div>

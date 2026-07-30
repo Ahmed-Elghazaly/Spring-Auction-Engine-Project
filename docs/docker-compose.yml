@@ -17,7 +17,12 @@ services:
       APP_USER_PASSWORD: ${DB_PASSWORD:?set DB_PASSWORD in .env}
     volumes:
       - oracle-data:/opt/oracle/oradata
-      - ../bidforge/src/main/resources/db/schema.sql:/container-entrypoint-initdb.d/01-schema.sql:ro
+      # schema.sql is mounted OUTSIDE the init directory on purpose: the image
+      # would run a *.sql file there as "sqlplus / as sysdba", which connects to
+      # CDB$ROOT and would create every table in the SYS schema instead of ours.
+      # The .sh wrapper below applies it as the application user. See db-init.sh.
+      - ../bidforge/src/main/resources/db/schema.sql:/opt/bidforge/schema.sql:ro
+      - ./db-init.sh:/container-entrypoint-initdb.d/01-apply-schema.sh:ro
     healthcheck:
       test: [ "CMD", "healthcheck.sh" ]
       interval: 10s

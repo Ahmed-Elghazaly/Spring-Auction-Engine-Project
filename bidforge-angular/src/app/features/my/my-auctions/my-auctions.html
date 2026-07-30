@@ -1,0 +1,107 @@
+<div class="bf-container bf-page">
+  <header class="bf-my-header">
+    <div>
+      <h1 class="bf-my-header__title">My auctions</h1>
+      <p class="bf-muted bf-my-header__subtitle">
+        Everything you have listed, newest first.
+      </p>
+    </div>
+    <a mat-flat-button routerLink="/auctions/new">
+      <mat-icon>add_circle</mat-icon>
+      New auction
+    </a>
+  </header>
+
+  @if (tallies().length > 0) {
+    <div class="bf-my-tallies">
+      @for (tally of tallies(); track tally.status) {
+        <span class="bf-my-tally" [attr.data-status]="tally.status">
+          <strong class="bf-tabular">{{ tally.count }}</strong>
+          {{ statusLabels[tally.status] }}
+        </span>
+      }
+    </div>
+  }
+
+  @if (loading()) {
+    <app-skeleton-grid [count]="6" />
+  } @else if (result().content.length === 0) {
+    <app-empty-state
+      icon="storefront"
+      title="You have not listed anything yet"
+      message="Create your first auction and it will open automatically at the time you choose."
+    >
+      <a mat-flat-button routerLink="/auctions/new">
+        <mat-icon>add_circle</mat-icon>
+        Create an auction
+      </a>
+    </app-empty-state>
+  } @else {
+    <div class="bf-grid">
+      @for (auction of result().content; track auction.id) {
+        <div class="bf-my-item">
+          <app-auction-card [auction]="auction" />
+
+          @let allowed = actionsFor(auction.status);
+          @if (allowed.canEdit || allowed.canOpen || allowed.canClose || allowed.canCancel) {
+            <div class="bf-my-item__actions">
+              @if (allowed.canEdit) {
+                <a
+                  mat-stroked-button
+                  [routerLink]="['/auctions', auction.id, 'edit']"
+                  matTooltip="Change the details before bidding starts"
+                >
+                  <mat-icon>edit</mat-icon>
+                  Edit
+                </a>
+              }
+              @if (allowed.canOpen) {
+                <button
+                  mat-stroked-button
+                  type="button"
+                  [disabled]="busyId() === auction.id"
+                  (click)="openAuction(auction.id)"
+                >
+                  <mat-icon>play_arrow</mat-icon>
+                  Open
+                </button>
+              }
+              @if (allowed.canClose) {
+                <button
+                  mat-stroked-button
+                  type="button"
+                  [disabled]="busyId() === auction.id"
+                  (click)="closeAuction(auction.id)"
+                >
+                  <mat-icon>flag</mat-icon>
+                  Close
+                </button>
+              }
+              @if (allowed.canCancel) {
+                <button
+                  mat-stroked-button
+                  type="button"
+                  class="bf-my-item__danger"
+                  [disabled]="busyId() === auction.id"
+                  (click)="cancelAuction(auction.id)"
+                >
+                  <mat-icon>block</mat-icon>
+                  Cancel
+                </button>
+              }
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <mat-paginator
+      [length]="result().totalElements"
+      [pageIndex]="pageIndex()"
+      [pageSize]="pageSize()"
+      [pageSizeOptions]="[12, 24, 48]"
+      (page)="onPageChange($event)"
+      aria-label="Select page of your auctions"
+    />
+  }
+</div>

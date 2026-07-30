@@ -61,10 +61,10 @@ class BidServiceTest {
     @BeforeEach
     void setUp() {
         service = new BidService(bidRepository, auctionRepository, userRepository, auditService);
-        seller = user(1L, "seller1");
-        bidder = user(2L, "bidder1");
-        lenient().when(userRepository.findByUsername("seller1")).thenReturn(Optional.of(seller));
-        lenient().when(userRepository.findByUsername("bidder1")).thenReturn(Optional.of(bidder));
+        seller = user(1L, "sara");
+        bidder = user(2L, "layla");
+        lenient().when(userRepository.findByUsername("sara")).thenReturn(Optional.of(seller));
+        lenient().when(userRepository.findByUsername("layla")).thenReturn(Optional.of(bidder));
         lenient().when(bidRepository.save(any(Bid.class))).thenAnswer(inv -> {
             Bid bid = inv.getArgument(0);
             ReflectionTestUtils.setField(bid, "id", 99L);
@@ -76,14 +76,14 @@ class BidServiceTest {
     @Test
     void sellerCannotBidOnOwnAuction() {
         lockReturns(englishAuction(AuctionStatus.OPEN, null));
-        assertThatThrownBy(() -> service.placeBid("seller1", 10L, bid("150.00")))
+        assertThatThrownBy(() -> service.placeBid("sara", 10L, bid("150.00")))
                 .isInstanceOf(SellerCannotBidException.class);
     }
 
     @Test
     void rejectsBidWhenAuctionNotOpen() {
         lockReturns(englishAuction(AuctionStatus.SCHEDULED, null));
-        assertThatThrownBy(() -> service.placeBid("bidder1", 10L, bid("150.00")))
+        assertThatThrownBy(() -> service.placeBid("layla", 10L, bid("150.00")))
                 .isInstanceOf(InvalidAuctionStateException.class)
                 .hasMessageContaining("SCHEDULED");
     }
@@ -93,7 +93,7 @@ class BidServiceTest {
         Auction auction = englishAuction(AuctionStatus.OPEN, null);
         auction.setEndTime(Instant.now().minus(1, ChronoUnit.MINUTES));
         lockReturns(auction);
-        assertThatThrownBy(() -> service.placeBid("bidder1", 10L, bid("150.00")))
+        assertThatThrownBy(() -> service.placeBid("layla", 10L, bid("150.00")))
                 .isInstanceOf(InvalidAuctionStateException.class)
                 .hasMessageContaining("end time");
     }
@@ -102,7 +102,7 @@ class BidServiceTest {
     @Test
     void english_firstBidMustReachStartingPrice() {
         lockReturns(englishAuction(AuctionStatus.OPEN, null));
-        assertThatThrownBy(() -> service.placeBid("bidder1", 10L, bid("99.99")))
+        assertThatThrownBy(() -> service.placeBid("layla", 10L, bid("99.99")))
                 .isInstanceOf(BidTooLowException.class)
                 .hasMessageContaining("starting price");
     }
@@ -110,7 +110,7 @@ class BidServiceTest {
     @Test
     void english_firstBidAtStartingPriceAccepted_andBecomesHighest() {
         Auction auction = lockReturns(englishAuction(AuctionStatus.OPEN, null));
-        BidResponse response = service.placeBid("bidder1", 10L, bid("100.00"));
+        BidResponse response = service.placeBid("layla", 10L, bid("100.00"));
 
         assertThat(response.amount()).isEqualByComparingTo("100.00");
         assertThat(auction.getCurrentHighestBid()).isEqualByComparingTo("100.00");
@@ -120,7 +120,7 @@ class BidServiceTest {
     @Test
     void english_mustBeatHighestByIncrement() {
         lockReturns(englishAuction(AuctionStatus.OPEN, new BigDecimal("100.00")));
-        assertThatThrownBy(() -> service.placeBid("bidder1", 10L, bid("105.00")))
+        assertThatThrownBy(() -> service.placeBid("layla", 10L, bid("105.00")))
                 .isInstanceOf(BidTooLowException.class)
                 .hasMessageContaining("110");
     }
@@ -128,7 +128,7 @@ class BidServiceTest {
     @Test
     void english_validOutbidUpdatesHighest() {
         Auction auction = lockReturns(englishAuction(AuctionStatus.OPEN, new BigDecimal("100.00")));
-        service.placeBid("bidder1", 10L, bid("110.00"));
+        service.placeBid("layla", 10L, bid("110.00"));
         assertThat(auction.getCurrentHighestBid()).isEqualByComparingTo("110.00");
     }
 
@@ -137,8 +137,8 @@ class BidServiceTest {
     @Test
     void sealed_secondBidBySameUserRejected() {
         lockReturns(sealedAuction(AuctionStatus.OPEN));
-        when(bidRepository.existsByAuctionIdAndBidderUsername(10L, "bidder1")).thenReturn(true);
-        assertThatThrownBy(() -> service.placeBid("bidder1", 10L, bid("500.00")))
+        when(bidRepository.existsByAuctionIdAndBidderUsername(10L, "layla")).thenReturn(true);
+        assertThatThrownBy(() -> service.placeBid("layla", 10L, bid("500.00")))
                 .isInstanceOf(DuplicateSealedBidException.class);
         verify(bidRepository, never()).save(any());
     }
@@ -146,17 +146,17 @@ class BidServiceTest {
     @Test
     void sealed_bidMustReachStartingPrice() {
         lockReturns(sealedAuction(AuctionStatus.OPEN));
-        when(bidRepository.existsByAuctionIdAndBidderUsername(10L, "bidder1")).thenReturn(false);
-        assertThatThrownBy(() -> service.placeBid("bidder1", 10L, bid("99.00")))
+        when(bidRepository.existsByAuctionIdAndBidderUsername(10L, "layla")).thenReturn(false);
+        assertThatThrownBy(() -> service.placeBid("layla", 10L, bid("99.00")))
                 .isInstanceOf(BidTooLowException.class);
     }
 
     @Test
     void sealed_acceptedBidNeverTouchesCurrentHighest() {
         Auction auction = lockReturns(sealedAuction(AuctionStatus.OPEN));
-        when(bidRepository.existsByAuctionIdAndBidderUsername(10L, "bidder1")).thenReturn(false);
+        when(bidRepository.existsByAuctionIdAndBidderUsername(10L, "layla")).thenReturn(false);
 
-        service.placeBid("bidder1", 10L, bid("500.00"));
+        service.placeBid("layla", 10L, bid("500.00"));
 
         assertThat(auction.getCurrentHighestBid()).isNull();
     }
@@ -185,10 +185,10 @@ class BidServiceTest {
     @Test
     void sealed_open_viewerSeesOnlyOwnBids() {
         findReturns(sealedAuction(AuctionStatus.OPEN));
-        when(bidRepository.findByAuctionIdAndBidderUsername(10L, "bidder1", page))
+        when(bidRepository.findByAuctionIdAndBidderUsername(10L, "layla", page))
                 .thenReturn(pageOfOneBid());
 
-        Page<BidResponse> result = service.getBidsForAuction("bidder1", 10L, page);
+        Page<BidResponse> result = service.getBidsForAuction("layla", 10L, page);
 
         assertThat(result.getTotalElements()).isEqualTo(1);
         verify(bidRepository, never()).findByAuctionId(anyLong(), any());
@@ -210,10 +210,10 @@ class BidServiceTest {
         Auction auction = englishAuction(AuctionStatus.OPEN, new BigDecimal("110.00"));
         Bid winning = new Bid(new BigDecimal("110.00"), auction, bidder);
         Bid outbid = new Bid(new BigDecimal("100.00"), auction, bidder);
-        when(bidRepository.findByBidderUsername("bidder1", page))
+        when(bidRepository.findByBidderUsername("layla", page))
                 .thenReturn(new PageImpl<>(List.of(winning, outbid), page, 2));
 
-        Page<MyBidResponse> result = service.myBids("bidder1", page);
+        Page<MyBidResponse> result = service.myBids("layla", page);
 
         assertThat(result.getContent().get(0).currentlyWinning()).isTrue();
         assertThat(result.getContent().get(1).currentlyWinning()).isFalse();
@@ -223,10 +223,10 @@ class BidServiceTest {
     void myBids_sealedBidsHaveNoWinningFlag() {
         Auction auction = sealedAuction(AuctionStatus.OPEN);
         Bid sealedBid = new Bid(new BigDecimal("500.00"), auction, bidder);
-        when(bidRepository.findByBidderUsername("bidder1", page))
+        when(bidRepository.findByBidderUsername("layla", page))
                 .thenReturn(new PageImpl<>(List.of(sealedBid), page, 1));
 
-        Page<MyBidResponse> result = service.myBids("bidder1", page);
+        Page<MyBidResponse> result = service.myBids("layla", page);
 
         assertThat(result.getContent().get(0).currentlyWinning()).isNull();
     }

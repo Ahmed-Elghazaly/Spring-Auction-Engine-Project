@@ -1,0 +1,223 @@
+<div class="bf-container bf-page bf-form-page">
+  <a routerLink="/auctions" class="bf-form-page__back">
+    <mat-icon>arrow_back</mat-icon>
+    All auctions
+  </a>
+
+  <mat-card appearance="outlined" class="bf-form-page__card">
+    @if (loading() || submitting()) {
+      <mat-progress-bar mode="indeterminate" />
+    }
+
+    <mat-card-header class="bf-form-page__header">
+      <mat-card-title>{{ heading() }}</mat-card-title>
+      <mat-card-subtitle>
+        @if (isEdit()) {
+          Changes apply only while the auction has not opened yet.
+        } @else {
+          It starts as <strong>scheduled</strong> and opens by itself at the time you choose.
+        }
+      </mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+
+      @if (blockedReason(); as reason) {
+        <div class="bf-form-page__blocked">
+          <mat-icon>lock</mat-icon>
+          <div>
+            <p>{{ reason }}</p>
+            @if (existing(); as auction) {
+              <a mat-stroked-button [routerLink]="['/auctions', auction.id]">
+                View the auction
+              </a>
+            } @else {
+              <a mat-stroked-button routerLink="/auctions">Browse auctions</a>
+            }
+          </div>
+        </div>
+      } @else {
+        <form [formGroup]="form" (ngSubmit)="submit()" class="bf-auction-form">
+
+          <h2 class="bf-auction-form__section">What are you selling?</h2>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Title</mat-label>
+            <input matInput formControlName="title" maxlength="100" required />
+            <mat-hint align="end">{{ form.controls.title.value.length }} / 100</mat-hint>
+            @if (form.controls.title.hasError('required')) {
+              <mat-error>A title is required</mat-error>
+            } @else if (form.controls.title.hasError('minlength')) {
+              <mat-error>At least 3 characters</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Description</mat-label>
+            <textarea
+              matInput
+              formControlName="description"
+              rows="4"
+              maxlength="2000"
+              placeholder="Condition, history, what is included…"
+            ></textarea>
+            <mat-hint align="end">{{ form.controls.description.value.length }} / 2000</mat-hint>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Category</mat-label>
+            <mat-select formControlName="category" required>
+              @for (category of categories; track category) {
+                <mat-option [value]="category">{{ categoryLabels[category] }}</mat-option>
+              }
+            </mat-select>
+            @if (form.controls.category.hasError('required')) {
+              <mat-error>Pick a category</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-divider />
+
+          <h2 class="bf-auction-form__section">How should bidding work?</h2>
+
+          @if (isEdit()) {
+            <div class="bf-auction-form__locked">
+              <mat-icon>lock</mat-icon>
+              <div>
+                <span class="bf-muted">Format</span>
+                <strong>{{ typeLabels[form.controls.auctionType.value] }}</strong>
+                <p class="bf-muted">The format cannot be changed after an auction is created.</p>
+              </div>
+            </div>
+          } @else {
+            <mat-form-field appearance="outline">
+              <mat-label>Format</mat-label>
+              <mat-select formControlName="auctionType" required>
+                @for (type of types; track type) {
+                  <mat-option [value]="type">{{ typeLabels[type] }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          }
+
+          <p class="bf-auction-form__hint">
+            <mat-icon>{{ isSealed() ? 'lock' : 'gavel' }}</mat-icon>
+            {{ typeHints[form.controls.auctionType.value] }}
+          </p>
+
+          <div class="bf-auction-form__row">
+            <mat-form-field appearance="outline">
+              <mat-label>Starting price</mat-label>
+              <span matTextPrefix>$&nbsp;</span>
+              <input
+                matInput
+                type="number"
+                step="0.01"
+                min="0.01"
+                formControlName="startingPrice"
+                placeholder="0.00"
+                required
+              />
+              @if (form.controls.startingPrice.hasError('required')) {
+                <mat-error>A starting price is required</mat-error>
+              } @else if (form.controls.startingPrice.hasError('min')) {
+                <mat-error>Must be at least $0.01</mat-error>
+              } @else if (form.controls.startingPrice.hasError('twoDecimals')) {
+                <mat-error>At most 2 decimal places</mat-error>
+              }
+            </mat-form-field>
+
+            @if (!isSealed()) {
+              <mat-form-field appearance="outline">
+                <mat-label>Minimum increment</mat-label>
+                <span matTextPrefix>$&nbsp;</span>
+                <input
+                  matInput
+                  type="number"
+                  step="0.01"
+                  min="0.01"
+                  formControlName="minIncrement"
+                  placeholder="0.00"
+                  required
+                />
+                <mat-hint>How much each new bid must beat the last one by.</mat-hint>
+                @if (form.controls.minIncrement.hasError('required')) {
+                  <mat-error>English auctions need a minimum increment</mat-error>
+                } @else if (form.controls.minIncrement.hasError('min')) {
+                  <mat-error>Must be at least $0.01</mat-error>
+                } @else if (form.controls.minIncrement.hasError('twoDecimals')) {
+                  <mat-error>At most 2 decimal places</mat-error>
+                }
+              </mat-form-field>
+            }
+          </div>
+
+          <mat-divider />
+
+          <h2 class="bf-auction-form__section">When does it run?</h2>
+
+          <div class="bf-auction-form__row">
+            <mat-form-field appearance="outline">
+              <mat-label>Opens</mat-label>
+              <input
+                matInput
+                type="datetime-local"
+                formControlName="startTime"
+                [min]="minDateTime"
+                required
+              />
+              @if (form.controls.startTime.hasError('required')) {
+                <mat-error>Choose a start time</mat-error>
+              } @else if (form.controls.startTime.hasError('pastDate')) {
+                <mat-error>The start time must be in the future</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Closes</mat-label>
+              <input
+                matInput
+                type="datetime-local"
+                formControlName="endTime"
+                [min]="minDateTime"
+                required
+              />
+              @if (form.controls.endTime.hasError('required')) {
+                <mat-error>Choose an end time</mat-error>
+              } @else if (form.controls.endTime.hasError('pastDate')) {
+                <mat-error>The end time must be in the future</mat-error>
+              }
+            </mat-form-field>
+          </div>
+
+          @if (endBeforeStart() && form.controls.endTime.touched) {
+            <p class="bf-auction-form__crosserror">
+              <mat-icon>error_outline</mat-icon>
+              The closing time must be after the opening time.
+            </p>
+          }
+
+          <p class="bf-auction-form__hint">
+            <mat-icon>schedule</mat-icon>
+            Times are in your own time zone. The server stores them in UTC, so
+            everyone sees the same moment wherever they are.
+          </p>
+
+          <div class="bf-auction-form__actions">
+            <a
+              mat-stroked-button
+              type="button"
+              [routerLink]="existing() ? ['/auctions', existing()!.id] : ['/auctions']"
+            >
+              Cancel
+            </a>
+            <button mat-flat-button type="submit" [disabled]="submitting()">
+              <mat-icon>{{ isEdit() ? 'save' : 'add_circle' }}</mat-icon>
+              {{ submitLabel() }}
+            </button>
+          </div>
+        </form>
+      }
+    </mat-card-content>
+  </mat-card>
+</div>

@@ -1,0 +1,170 @@
+<div class="bf-container bf-page">
+  <header class="bf-admin-header">
+    <div>
+      <p class="bf-admin-header__eyebrow">
+        <mat-icon>shield</mat-icon>
+        Administration
+      </p>
+      <h1 class="bf-admin-header__title">Audit trail</h1>
+      <p class="bf-muted bf-admin-header__subtitle">
+        Every state change in the system, in the order it happened. Rows are written by the
+        backend as things occur and are never edited or deleted.
+      </p>
+    </div>
+  </header>
+
+  <div class="bf-admin-filters">
+    <mat-form-field appearance="outline">
+      <mat-label>Actor</mat-label>
+      <input matInput [formControl]="actorControl" placeholder="username or SYSTEM" />
+      <mat-icon matSuffix>person</mat-icon>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Record type</mat-label>
+      <mat-select [(value)]="entityType" (selectionChange)="onFilterChange()">
+        <mat-option [value]="undefined">Any record</mat-option>
+        @for (option of entityTypes; track option) {
+          <mat-option [value]="option">{{ option }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Record ID</mat-label>
+      <input matInput type="number" [formControl]="entityIdControl" placeholder="e.g. 1" />
+      <mat-icon matSuffix>tag</mat-icon>
+    </mat-form-field>
+
+    @if (hasActiveFilters()) {
+      <button
+        mat-stroked-button
+        type="button"
+        class="bf-admin-filters__clear"
+        (click)="clearFilters()"
+      >
+        <mat-icon>filter_alt_off</mat-icon>
+        Clear
+      </button>
+    }
+  </div>
+
+  @if (!loading()) {
+    <div class="bf-admin-tallies">
+      <span class="bf-admin-tally">
+        <strong class="bf-tabular">{{ result().totalElements }}</strong>
+        @let noun = result().totalElements === 1 ? 'event' : 'events';
+        @if (hasActiveFilters()) {
+          matching {{ noun }}
+        } @else {
+          {{ noun }} recorded
+        }
+      </span>
+      @if (systemCount() > 0) {
+        <button type="button" class="bf-admin-tally bf-admin-tally--button" (click)="showSystemOnly()">
+          <strong class="bf-tabular">{{ systemCount() }}</strong>
+          by the scheduler — show only these
+        </button>
+      }
+    </div>
+  }
+
+  @if (loading()) {
+    <div class="bf-skeleton bf-table-skeleton"></div>
+  } @else if (result().content.length === 0) {
+    <app-empty-state
+      icon="history"
+      title="No events match those filters"
+      message="Every registration, bid, and auction change is recorded here as it happens."
+    >
+      <button mat-stroked-button type="button" (click)="clearFilters()">Clear filters</button>
+    </app-empty-state>
+  } @else {
+    <div class="bf-table-wrap">
+      <table mat-table [dataSource]="result().content" class="bf-table">
+        <ng-container matColumnDef="when">
+          <th mat-header-cell *matHeaderCellDef>When</th>
+          <td mat-cell *matCellDef="let event" class="bf-muted bf-nowrap">
+            {{ event.createdAt | date: 'MMM d, y' }}
+            <span class="bf-table__sub bf-tabular">{{ event.createdAt | date: 'HH:mm:ss' }}</span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="actor">
+          <th mat-header-cell *matHeaderCellDef>Actor</th>
+          <td mat-cell *matCellDef="let event">
+            @if (isSystem(event)) {
+              <span
+                class="bf-actor"
+                data-kind="system"
+                matTooltip="Written by the backend's scheduled job, not by a person"
+              >
+                <mat-icon>smart_toy</mat-icon>
+                SYSTEM
+              </span>
+            } @else {
+              <span class="bf-actor">
+                <mat-icon>person</mat-icon>
+                {{ event.actor }}
+              </span>
+            }
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="action">
+          <th mat-header-cell *matHeaderCellDef>Action</th>
+          <td mat-cell *matCellDef="let event">
+            @let visual = style(event);
+            <span class="bf-action" [attr.data-tone]="visual.tone">
+              <mat-icon>{{ visual.icon }}</mat-icon>
+              {{ label(event) }}
+            </span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="entity">
+          <th mat-header-cell *matHeaderCellDef>Record</th>
+          <td mat-cell *matCellDef="let event">
+            <div class="bf-entitycell">
+              @if (linksToAuction(event)) {
+                <a [routerLink]="['/auctions', event.entityId]" class="bf-table__link">
+                  {{ event.entityType }} #{{ event.entityId }}
+                </a>
+              } @else {
+                <span>{{ event.entityType }} #{{ event.entityId }}</span>
+              }
+              <button
+                type="button"
+                class="bf-iconlink"
+                (click)="traceEntity(event)"
+                matTooltip="Show every event for this record"
+                aria-label="Show every event for this record"
+              >
+                <mat-icon>filter_alt</mat-icon>
+              </button>
+            </div>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="details">
+          <th mat-header-cell *matHeaderCellDef>Details</th>
+          <td mat-cell *matCellDef="let event" class="bf-muted bf-details">
+            {{ event.details || '—' }}
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="columns"></tr>
+        <tr mat-row *matRowDef="let row; columns: columns"></tr>
+      </table>
+    </div>
+
+    <mat-paginator
+      [length]="result().totalElements"
+      [pageIndex]="pageIndex()"
+      [pageSize]="pageSize()"
+      [pageSizeOptions]="[25, 50]"
+      (page)="onPageChange($event)"
+      aria-label="Select page of audit events"
+    />
+  }
+</div>

@@ -56,12 +56,12 @@ class AuctionServiceTest {
         service = new AuctionService(auctionRepository, userRepository, bidRepository,
                 auctionResultRepository, auditService);
 
-        seller = user(1L, "seller1");
+        seller = user(1L, "sara");
         stranger = user(2L, "stranger");
         admin = user(3L, "admin");
         admin.addRole(new Role(RoleName.ROLE_ADMIN));
 
-        lenient().when(userRepository.findByUsername("seller1")).thenReturn(Optional.of(seller));
+        lenient().when(userRepository.findByUsername("sara")).thenReturn(Optional.of(seller));
         lenient().when(userRepository.findByUsername("stranger")).thenReturn(Optional.of(stranger));
         lenient().when(userRepository.findByUsername("admin")).thenReturn(Optional.of(admin));
         lenient().when(auctionRepository.save(any(Auction.class)))
@@ -75,7 +75,7 @@ class AuctionServiceTest {
     void create_rejectsEndTimeBeforeStartTime() {
         CreateAuctionRequest request = createRequest(AuctionType.ENGLISH, new BigDecimal("1.00"),
                 nextWeek, tomorrow);
-        assertThatThrownBy(() -> service.create("seller1", request))
+        assertThatThrownBy(() -> service.create("sara", request))
                 .isInstanceOf(BusinessRuleException.class)
                 .hasMessageContaining("endTime");
     }
@@ -83,7 +83,7 @@ class AuctionServiceTest {
     @Test
     void create_rejectsEnglishWithoutIncrement() {
         CreateAuctionRequest request = createRequest(AuctionType.ENGLISH, null, tomorrow, nextWeek);
-        assertThatThrownBy(() -> service.create("seller1", request))
+        assertThatThrownBy(() -> service.create("sara", request))
                 .isInstanceOf(BusinessRuleException.class)
                 .hasMessageContaining("minIncrement is required");
     }
@@ -92,7 +92,7 @@ class AuctionServiceTest {
     void create_rejectsSealedWithIncrement() {
         CreateAuctionRequest request = createRequest(AuctionType.SEALED_BID, new BigDecimal("1.00"),
                 tomorrow, nextWeek);
-        assertThatThrownBy(() -> service.create("seller1", request))
+        assertThatThrownBy(() -> service.create("sara", request))
                 .isInstanceOf(BusinessRuleException.class)
                 .hasMessageContaining("must not be set");
     }
@@ -101,10 +101,10 @@ class AuctionServiceTest {
     void create_validEnglishAuction_startsScheduled() {
         CreateAuctionRequest request = createRequest(AuctionType.ENGLISH, new BigDecimal("5.00"),
                 tomorrow, nextWeek);
-        AuctionResponse response = service.create("seller1", request);
+        AuctionResponse response = service.create("sara", request);
 
         assertThat(response.status()).isEqualTo(AuctionStatus.SCHEDULED);
-        assertThat(response.sellerUsername()).isEqualTo("seller1");
+        assertThat(response.sellerUsername()).isEqualTo("sara");
         verify(auctionRepository).save(any(Auction.class));
     }
 
@@ -119,7 +119,7 @@ class AuctionServiceTest {
     @Test
     void update_rejectsWhenNotScheduled() {
         lockReturns(auction(10L, AuctionType.ENGLISH, AuctionStatus.OPEN));
-        assertThatThrownBy(() -> service.update("seller1", 10L, updateRequest()))
+        assertThatThrownBy(() -> service.update("sara", 10L, updateRequest()))
                 .isInstanceOf(InvalidAuctionStateException.class);
     }
 
@@ -127,14 +127,14 @@ class AuctionServiceTest {
     @Test
     void open_movesScheduledToOpen() {
         Auction auction = lockReturns(auction(10L, AuctionType.ENGLISH, AuctionStatus.SCHEDULED));
-        service.open("seller1", 10L);
+        service.open("sara", 10L);
         assertThat(auction.getStatus()).isEqualTo(AuctionStatus.OPEN);
     }
 
     @Test
     void open_rejectsWhenAlreadyOpen() {
         lockReturns(auction(10L, AuctionType.ENGLISH, AuctionStatus.OPEN));
-        assertThatThrownBy(() -> service.open("seller1", 10L))
+        assertThatThrownBy(() -> service.open("sara", 10L))
                 .isInstanceOf(InvalidAuctionStateException.class);
     }
 
@@ -148,14 +148,14 @@ class AuctionServiceTest {
     @Test
     void cancel_ownerCanCancelScheduled() {
         Auction auction = lockReturns(auction(10L, AuctionType.ENGLISH, AuctionStatus.SCHEDULED));
-        service.cancel("seller1", 10L);
+        service.cancel("sara", 10L);
         assertThat(auction.getStatus()).isEqualTo(AuctionStatus.CANCELLED);
     }
 
     @Test
     void cancel_ownerCannotCancelOpen_adminCan() {
         Auction auction = lockReturns(auction(10L, AuctionType.ENGLISH, AuctionStatus.OPEN));
-        assertThatThrownBy(() -> service.cancel("seller1", 10L))
+        assertThatThrownBy(() -> service.cancel("sara", 10L))
                 .isInstanceOf(InvalidAuctionStateException.class);
 
         service.cancel("admin", 10L);
@@ -177,7 +177,7 @@ class AuctionServiceTest {
         when(bidRepository.findFirstByAuctionIdOrderByAmountDescCreatedAtAsc(10L))
                 .thenReturn(Optional.of(top));
 
-        AuctionResponse response = service.close("seller1", 10L);
+        AuctionResponse response = service.close("sara", 10L);
 
         assertThat(auction.getStatus()).isEqualTo(AuctionStatus.CLOSED);
         assertThat(response.result().winnerUsername()).isEqualTo("stranger");
@@ -190,7 +190,7 @@ class AuctionServiceTest {
         when(bidRepository.findFirstByAuctionIdOrderByAmountDescCreatedAtAsc(10L))
                 .thenReturn(Optional.empty());
 
-        AuctionResponse response = service.close("seller1", 10L);
+        AuctionResponse response = service.close("sara", 10L);
 
         assertThat(auction.getStatus()).isEqualTo(AuctionStatus.CLOSED);
         assertThat(response.result().winnerUsername()).isNull();
@@ -200,7 +200,7 @@ class AuctionServiceTest {
     @Test
     void close_rejectsWhenNotOpen() {
         lockReturns(auction(10L, AuctionType.ENGLISH, AuctionStatus.CLOSED));
-        assertThatThrownBy(() -> service.close("seller1", 10L))
+        assertThatThrownBy(() -> service.close("sara", 10L))
                 .isInstanceOf(InvalidAuctionStateException.class);
         verify(auctionResultRepository, never()).save(any());
     }

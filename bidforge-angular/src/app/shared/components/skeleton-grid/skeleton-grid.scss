@@ -1,0 +1,31 @@
+.bf-skeleton-card {
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: var(--bf-radius);
+  padding-bottom: 16px;
+  overflow: hidden;
+  background: var(--mat-sys-surface);
+}
+
+.bf-skeleton-card__band {
+  height: 92px;
+  border-radius: 0;
+}
+
+.bf-skeleton-card__line {
+  height: 13px;
+  margin: 14px 16px 0;
+}
+
+.bf-skeleton-card__line--title {
+  width: 78%;
+}
+
+.bf-skeleton-card__line--short {
+  width: 45%;
+}
+
+.bf-skeleton-card__line--price {
+  width: 60%;
+  height: 22px;
+  margin-top: 20px;
+}

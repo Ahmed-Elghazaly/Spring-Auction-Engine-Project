@@ -1,0 +1,73 @@
+<div class="bf-container bf-page bf-profile-page">
+  <header class="bf-my-header">
+    <div>
+      <h1 class="bf-my-header__title">My profile</h1>
+      <p class="bf-muted bf-my-header__subtitle">Your account as the server sees it.</p>
+    </div>
+  </header>
+
+  @if (user(); as me) {
+    <mat-card appearance="outlined">
+      <mat-card-content class="bf-profile">
+        <div class="bf-profile__identity">
+          <span class="bf-profile__avatar" aria-hidden="true">{{ auth.initials() }}</span>
+          <div>
+            <h2 class="bf-profile__name">{{ fullName() }}</h2>
+            <p class="bf-muted bf-profile__username">&#64;{{ me.username }}</p>
+          </div>
+          @if (me.enabled) {
+            <span class="bf-profile__state" data-state="active">
+              <mat-icon>check_circle</mat-icon>
+              Active
+            </span>
+          } @else {
+            <span class="bf-profile__state" data-state="disabled">
+              <mat-icon>block</mat-icon>
+              Disabled
+            </span>
+          }
+        </div>
+
+        <mat-divider />
+
+        <dl class="bf-profile__facts">
+          <div><dt>Email</dt><dd>{{ me.email }}</dd></div>
+          <div><dt>Member since</dt><dd>{{ me.createdAt | date: 'longDate' }}</dd></div>
+          <div><dt>Account ID</dt><dd class="bf-tabular">#{{ me.id }}</dd></div>
+        </dl>
+
+        <mat-divider />
+
+        <h3 class="bf-profile__section">What you can do</h3>
+        <ul class="bf-profile__roles">
+          @for (role of roles(); track role.raw) {
+            <li class="bf-profile__role">
+              <mat-icon>{{ role.icon }}</mat-icon>
+              <div>
+                <strong>{{ role.label }}</strong>
+                <p class="bf-muted">{{ role.blurb }}</p>
+              </div>
+            </li>
+          }
+        </ul>
+
+        <div class="bf-profile__actions">
+          <a mat-stroked-button routerLink="/my/auctions">
+            <mat-icon>inventory_2</mat-icon>
+            My auctions
+          </a>
+          <a mat-stroked-button routerLink="/my/bids">
+            <mat-icon>gavel</mat-icon>
+            My bids
+          </a>
+          <button mat-stroked-button type="button" class="bf-profile__signout" (click)="signOut()">
+            <mat-icon>logout</mat-icon>
+            Sign out
+          </button>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  } @else {
+    <div class="bf-skeleton bf-profile-skeleton"></div>
+  }
+</div>

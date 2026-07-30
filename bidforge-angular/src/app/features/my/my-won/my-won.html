@@ -1,0 +1,99 @@
+<div class="bf-container bf-page">
+  <header class="bf-my-header">
+    <div>
+      <h1 class="bf-my-header__title">Auctions I won</h1>
+      <p class="bf-muted bf-my-header__subtitle">
+        Every auction that closed with you as the highest bidder.
+      </p>
+    </div>
+    <a mat-stroked-button routerLink="/my/bids">
+      <mat-icon>gavel</mat-icon>
+      All my bids
+    </a>
+  </header>
+
+  @if (!loading() && wins().length > 0) {
+    <div class="bf-my-tallies">
+      <span class="bf-my-tally" data-status="CLOSED">
+        <strong class="bf-tabular">{{ total() }}</strong>
+        won in total
+      </span>
+      <span class="bf-my-tally">
+        <strong class="bf-tabular">{{ pageTotal() | currency: 'USD' }}</strong>
+        on this page
+      </span>
+    </div>
+  }
+
+  @if (loading()) {
+    <div class="bf-grid">
+      @for (n of [0, 1, 2]; track n) {
+        <div class="bf-skeleton bf-won-skeleton"></div>
+      }
+    </div>
+  } @else if (wins().length === 0) {
+    <app-empty-state
+      icon="emoji_events"
+      title="No wins yet"
+      message="Auctions you win will be collected here, with what you paid for each."
+    >
+      <a mat-flat-button routerLink="/auctions">
+        <mat-icon>storefront</mat-icon>
+        Find an auction
+      </a>
+    </app-empty-state>
+  } @else {
+    <div class="bf-grid">
+      @for (win of wins(); track win.auction.id) {
+        @let a = win.auction;
+        <mat-card appearance="outlined" class="bf-won">
+
+          <div
+            class="bf-won__band"
+            [style.background]="'color-mix(in srgb, ' + win.visual.color + ' 16%, transparent)'"
+          >
+            <mat-icon [style.color]="win.visual.color">{{ win.visual.icon }}</mat-icon>
+            <span class="bf-won__category" [style.color]="win.visual.color">
+              {{ categoryLabels[a.category] }}
+            </span>
+            <mat-icon class="bf-won__trophy">emoji_events</mat-icon>
+          </div>
+
+          <mat-card-content class="bf-won__body">
+            <a [routerLink]="['/auctions', a.id]" class="bf-won__title">{{ a.title }}</a>
+
+            <div class="bf-won__price">
+              <span class="bf-muted">You paid</span>
+              <strong class="bf-tabular">
+
+                @if (a.result?.finalPrice != null) {
+                  {{ a.result!.finalPrice | currency: 'USD' }}
+                } @else {
+                  —
+                }
+              </strong>
+            </div>
+
+            <dl class="bf-won__facts">
+              <div><dt>Seller</dt><dd>{{ a.sellerUsername }}</dd></div>
+              <div><dt>Format</dt><dd>{{ typeLabels[a.auctionType] }}</dd></div>
+              <div><dt>Opened at</dt><dd>{{ a.startingPrice | currency: 'USD' }}</dd></div>
+              @if (a.result?.closedAt) {
+                <div><dt>Won on</dt><dd>{{ a.result!.closedAt | date: 'mediumDate' }}</dd></div>
+              }
+            </dl>
+          </mat-card-content>
+        </mat-card>
+      }
+    </div>
+
+    <mat-paginator
+      [length]="total()"
+      [pageIndex]="pageIndex()"
+      [pageSize]="pageSize()"
+      [pageSizeOptions]="[9, 18, 36]"
+      (page)="onPageChange($event)"
+      aria-label="Select page of auctions you won"
+    />
+  }
+</div>

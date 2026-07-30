@@ -1,0 +1,86 @@
+.bf-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  padding: 0;
+  background: var(--mat-sys-surface-container);
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+}
+
+.bf-toolbar__inner {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 64px;
+}
+
+.bf-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-right: 12px;
+  text-decoration: none;
+  color: inherit;
+  font-size: 1.25rem;
+  font-weight: 500;
+  letter-spacing: -0.3px;
+}
+
+.bf-brand__icon {
+  color: var(--mat-sys-primary);
+}
+
+.bf-nav {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.bf-nav__link--active {
+  color: var(--mat-sys-primary);
+  font-weight: 500;
+}
+
+.bf-account {
+  display: inline-flex;
+  align-items: center;
+}
+
+.bf-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  margin-right: 10px;
+  border-radius: 50%;
+  background: var(--mat-sys-primary);
+  color: var(--mat-sys-on-primary);
+  font-size: 0.78rem;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.bf-account__name {
+  margin-right: 2px;
+}
+
+.bf-account__caret {
+  margin-left: 0;
+}
+
+.bf-cta {
+  margin-left: 4px;
+}
+
+@media (max-width: 720px) {
+  .bf-nav__label,
+  .bf-account__name,
+  .bf-brand__text {
+    display: none;
+  }
+
+  .bf-toolbar__inner {
+    gap: 0;
+  }
+}

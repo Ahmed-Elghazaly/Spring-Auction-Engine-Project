@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "BidForge — Auction Engine API",
-    "description": "Complete request collection for the BidForge auction backend.\n\n## Before you start\n1. Start the database:  docker compose --env-file .env -f docs/docker-compose.yml up -d\n2. Start the API:       cd bidforge && ./mvnw spring-boot:run\n\n## How to use it\nRun the folder **1 Auth** first — its login requests save JWTs into collection variables, and everything else reads them. After that any folder can be run on its own, or run the whole collection top-to-bottom with the Collection Runner: every request carries its own assertions, so you get a green checklist.\n\nSeeded accounts: admin/Admin@123, and seller1 / bidder1 / bidder2, all Password@123.\n\nFolder **5 Error showcase** deliberately triggers every error the API can produce (400, 401, 403, 404, 409, 422) to show the single consistent JSON error shape. Folder **6 Full demo flow** tells the whole story in order: create → open → rejected low bid → bidding war → close → winner → audit trail.",
+    "description": "Complete request collection for the BidForge auction backend.\n\n## Before you start\n1. Start the database:  docker compose --env-file .env -f docs/docker-compose.yml up -d\n2. Start the API:       cd bidforge && ./mvnw spring-boot:run\n\n## How to use it\nRun the folder **1 Auth** first — its login requests save JWTs into collection variables, and everything else reads them. After that any folder can be run on its own, or run the whole collection top-to-bottom with the Collection Runner: every request carries its own assertions, so you get a green checklist.\n\nSeeded accounts: admin/Admin@123, and sara / layla / youssef, all Password@123.\n\nFolder **5 Error showcase** deliberately triggers every error the API can produce (400, 401, 403, 404, 409, 422) to show the single consistent JSON error shape. Folder **6 Full demo flow** tells the whole story in order: create → open → rejected low bid → bidding war → close → winner → audit trail.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "event": [
@@ -33,11 +33,11 @@
       "value": ""
     },
     {
-      "key": "bidder1Token",
+      "key": "laylaToken",
       "value": ""
     },
     {
-      "key": "bidder2Token",
+      "key": "youssefToken",
       "value": ""
     },
     {
@@ -151,7 +151,7 @@
           ]
         },
         {
-          "name": "Login seller1",
+          "name": "Login sara",
           "request": {
             "method": "POST",
             "header": [
@@ -174,7 +174,7 @@
             "description": "Exchanges username + password for a JWT and stores it in a collection variable, so every later request in this collection is authenticated automatically.",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"username\": \"seller1\",\n  \"password\": \"Password@123\"\n}"
+              "raw": "{\n  \"username\": \"sara\",\n  \"password\": \"Password@123\"\n}"
             }
           },
           "event": [
@@ -192,7 +192,7 @@
           ]
         },
         {
-          "name": "Login bidder1",
+          "name": "Login layla",
           "request": {
             "method": "POST",
             "header": [
@@ -215,7 +215,7 @@
             "description": "Exchanges username + password for a JWT and stores it in a collection variable, so every later request in this collection is authenticated automatically.",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"username\": \"bidder1\",\n  \"password\": \"Password@123\"\n}"
+              "raw": "{\n  \"username\": \"layla\",\n  \"password\": \"Password@123\"\n}"
             }
           },
           "event": [
@@ -225,7 +225,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
-                  "pm.collectionVariables.set(\"bidder1Token\", pm.response.json().token);",
+                  "pm.collectionVariables.set(\"laylaToken\", pm.response.json().token);",
                   "pm.test(\"Returns a token\", () => pm.expect(pm.response.json().token).to.be.a(\"string\"));"
                 ]
               }
@@ -233,7 +233,7 @@
           ]
         },
         {
-          "name": "Login bidder2",
+          "name": "Login youssef",
           "request": {
             "method": "POST",
             "header": [
@@ -256,7 +256,7 @@
             "description": "Exchanges username + password for a JWT and stores it in a collection variable, so every later request in this collection is authenticated automatically.",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"username\": \"bidder2\",\n  \"password\": \"Password@123\"\n}"
+              "raw": "{\n  \"username\": \"youssef\",\n  \"password\": \"Password@123\"\n}"
             }
           },
           "event": [
@@ -266,7 +266,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
-                  "pm.collectionVariables.set(\"bidder2Token\", pm.response.json().token);",
+                  "pm.collectionVariables.set(\"youssefToken\", pm.response.json().token);",
                   "pm.test(\"Returns a token\", () => pm.expect(pm.response.json().token).to.be.a(\"string\"));"
                 ]
               }
@@ -743,7 +743,7 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer {{bidder1Token}}"
+                "value": "Bearer {{laylaToken}}"
               }
             ],
             "url": {
@@ -782,7 +782,7 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer {{bidder1Token}}"
+                "value": "Bearer {{laylaToken}}"
               },
               {
                 "key": "Content-Type",
@@ -826,7 +826,7 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer {{bidder2Token}}"
+                "value": "Bearer {{youssefToken}}"
               },
               {
                 "key": "Content-Type",
@@ -901,7 +901,7 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer {{bidder1Token}}"
+                "value": "Bearer {{laylaToken}}"
               },
               {
                 "key": "Content-Type",
@@ -977,7 +977,7 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer {{bidder1Token}}"
+                "value": "Bearer {{laylaToken}}"
               }
             ],
             "url": {
@@ -1013,7 +1013,7 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer {{bidder2Token}}"
+                "value": "Bearer {{youssefToken}}"
               }
             ],
             "url": {
@@ -1081,7 +1081,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
-                  "const u = pm.response.json().content.find(x => x.username === \"bidder2\");",
+                  "const u = pm.response.json().content.find(x => x.username === \"youssef\");",
                   "pm.collectionVariables.set(\"targetUserId\", u.id);"
                 ]
               }
@@ -1157,7 +1157,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"username\": \"bidder2\",\n  \"password\": \"Password@123\"\n}"
+              "raw": "{\n  \"username\": \"youssef\",\n  \"password\": \"Password@123\"\n}"
             }
           },
           "event": [
@@ -1229,7 +1229,7 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/admin/auctions?seller=seller1&size=50",
+              "raw": "{{baseUrl}}/api/admin/auctions?seller=sara&size=50",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -1241,7 +1241,7 @@
               "query": [
                 {
                   "key": "seller",
-                  "value": "seller1"
+                  "value": "sara"
                 },
                 {
                   "key": "size",
@@ -1345,7 +1345,7 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer {{bidder1Token}}"
+                "value": "Bearer {{laylaToken}}"
               }
             ],
             "url": {
@@ -1533,7 +1533,7 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer {{bidder1Token}}"
+                "value": "Bearer {{laylaToken}}"
               },
               {
                 "key": "Content-Type",
@@ -1577,7 +1577,7 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer {{bidder1Token}}"
+                "value": "Bearer {{laylaToken}}"
               },
               {
                 "key": "Content-Type",
@@ -1662,7 +1662,7 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer {{bidder1Token}}"
+                "value": "Bearer {{laylaToken}}"
               },
               {
                 "key": "Content-Type",
@@ -1851,13 +1851,13 @@
           ]
         },
         {
-          "name": "bidder1 tries too low → 422",
+          "name": "layla tries too low → 422",
           "request": {
             "method": "POST",
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer {{bidder1Token}}"
+                "value": "Bearer {{laylaToken}}"
               },
               {
                 "key": "Content-Type",
@@ -1894,13 +1894,13 @@
           ]
         },
         {
-          "name": "bidder1 bids 500 → accepted",
+          "name": "layla bids 500 → accepted",
           "request": {
             "method": "POST",
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer {{bidder1Token}}"
+                "value": "Bearer {{laylaToken}}"
               },
               {
                 "key": "Content-Type",
@@ -1937,13 +1937,13 @@
           ]
         },
         {
-          "name": "bidder2 outbids with 600",
+          "name": "youssef outbids with 600",
           "request": {
             "method": "POST",
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer {{bidder2Token}}"
+                "value": "Bearer {{youssefToken}}"
               },
               {
                 "key": "Content-Type",
@@ -2042,7 +2042,7 @@
                   "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
                   "const r = pm.response.json();",
                   "pm.test(\"CLOSED\", () => pm.expect(r.status).to.eql(\"CLOSED\"));",
-                  "pm.test(\"Winner is bidder2\", () => pm.expect(r.result.winnerUsername).to.eql(\"bidder2\"));",
+                  "pm.test(\"Winner is youssef\", () => pm.expect(r.result.winnerUsername).to.eql(\"youssef\"));",
                   "pm.test(\"Final price 600\", () => pm.expect(r.result.finalPrice).to.eql(600));"
                 ]
               }
@@ -2085,13 +2085,13 @@
           ]
         },
         {
-          "name": "bidder2 sees the trophy",
+          "name": "youssef sees the trophy",
           "request": {
             "method": "GET",
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer {{bidder2Token}}"
+                "value": "Bearer {{youssefToken}}"
               }
             ],
             "url": {

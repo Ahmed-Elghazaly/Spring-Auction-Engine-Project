@@ -1,0 +1,223 @@
+<div class="bf-container bf-page">
+  <header class="bf-admin-header">
+    <div>
+      <p class="bf-admin-header__eyebrow">
+        <mat-icon>shield</mat-icon>
+        Administration
+      </p>
+      <h1 class="bf-admin-header__title">All auctions</h1>
+      <p class="bf-muted bf-admin-header__subtitle">
+        Every auction on the platform, from every seller — including the ones the public
+        browse page filters out. You can also cancel an auction that is already taking bids.
+      </p>
+    </div>
+  </header>
+
+  <div class="bf-admin-filters">
+    <mat-form-field appearance="outline">
+      <mat-label>Search titles</mat-label>
+      <input matInput [formControl]="searchControl" placeholder="e.g. camera" />
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Seller</mat-label>
+      <input matInput [formControl]="sellerControl" placeholder="username" />
+      <mat-icon matSuffix>person</mat-icon>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Status</mat-label>
+      <mat-select [(value)]="status" (selectionChange)="onFilterChange()">
+        <mat-option [value]="undefined">Any status</mat-option>
+        @for (option of statuses; track option) {
+          <mat-option [value]="option">{{ statusLabels[option] }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Format</mat-label>
+      <mat-select [(value)]="type" (selectionChange)="onFilterChange()">
+        <mat-option [value]="undefined">Any format</mat-option>
+        @for (option of types; track option) {
+          <mat-option [value]="option">{{ typeLabels[option] }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Category</mat-label>
+      <mat-select [(value)]="category" (selectionChange)="onFilterChange()">
+        <mat-option [value]="undefined">Any category</mat-option>
+        @for (option of categories; track option) {
+          <mat-option [value]="option">{{ categoryLabels[option] }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    @if (hasActiveFilters()) {
+      <button
+        mat-stroked-button
+        type="button"
+        class="bf-admin-filters__clear"
+        (click)="clearFilters()"
+      >
+        <mat-icon>filter_alt_off</mat-icon>
+        Clear
+      </button>
+    }
+  </div>
+
+  @if (!loading()) {
+    <div class="bf-admin-tallies">
+      <span class="bf-admin-tally">
+        <strong class="bf-tabular">{{ result().totalElements }}</strong>
+
+        @let noun = result().totalElements === 1 ? 'auction' : 'auctions';
+        @if (hasActiveFilters()) {
+          matching {{ noun }}
+        } @else {
+          {{ noun }} in total
+        }
+      </span>
+    </div>
+  }
+
+  @if (loading()) {
+    <div class="bf-skeleton bf-table-skeleton"></div>
+  } @else if (result().content.length === 0) {
+    <app-empty-state
+      icon="fact_check"
+      title="No auctions match those filters"
+      message="Try widening the search, or clear the filters to see everything."
+    >
+      <button mat-stroked-button type="button" (click)="clearFilters()">Clear filters</button>
+    </app-empty-state>
+  } @else {
+    <div class="bf-table-wrap">
+      <table mat-table [dataSource]="result().content" class="bf-table">
+        <ng-container matColumnDef="title">
+          <th mat-header-cell *matHeaderCellDef>Auction</th>
+          <td mat-cell *matCellDef="let auction">
+            <a [routerLink]="['/auctions', auction.id]" class="bf-table__link">
+              {{ auction.title }}
+            </a>
+            <span class="bf-muted bf-table__sub bf-tabular">#{{ auction.id }}</span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="seller">
+          <th mat-header-cell *matHeaderCellDef>Seller</th>
+          <td mat-cell *matCellDef="let auction">
+
+            <button
+              type="button"
+              class="bf-linkbutton"
+              (click)="filterBySeller(auction.sellerUsername)"
+              matTooltip="Show only this seller's auctions"
+            >
+              {{ auction.sellerUsername }}
+            </button>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="type">
+          <th mat-header-cell *matHeaderCellDef>Format</th>
+          <td mat-cell *matCellDef="let auction" class="bf-muted">
+            {{ auction.auctionType === 'SEALED_BID' ? 'Sealed bid' : 'English' }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="price">
+          <th mat-header-cell *matHeaderCellDef class="bf-table__right">Price</th>
+          <td mat-cell *matCellDef="let auction" class="bf-table__right bf-tabular">
+
+            @if (auction.currentHighestBid != null) {
+              <strong>{{ auction.currentHighestBid | currency: 'USD' }}</strong>
+              <span class="bf-muted bf-table__sub">current</span>
+            } @else {
+              {{ auction.startingPrice | currency: 'USD' }}
+              <span class="bf-muted bf-table__sub">starting</span>
+            }
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="ends">
+          <th mat-header-cell *matHeaderCellDef>Ends</th>
+          <td mat-cell *matCellDef="let auction" class="bf-muted">
+            {{ auction.endTime | date: 'short' }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <td mat-cell *matCellDef="let auction">
+            <app-status-chip [status]="auction.status" />
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef class="bf-table__right">Actions</th>
+          <td mat-cell *matCellDef="let auction" class="bf-table__right">
+            @let allowed = actionsFor(auction.status);
+            <div class="bf-rowactions">
+              @if (allowed.canOpen) {
+                <button
+                  mat-icon-button
+                  type="button"
+                  [disabled]="busyId() === auction.id"
+                  (click)="openAuction(auction)"
+                  matTooltip="Open now"
+                  aria-label="Open this auction now"
+                >
+                  <mat-icon>play_arrow</mat-icon>
+                </button>
+              }
+              @if (allowed.canClose) {
+                <button
+                  mat-icon-button
+                  type="button"
+                  [disabled]="busyId() === auction.id"
+                  (click)="closeAuction(auction)"
+                  matTooltip="Close and pick the winner"
+                  aria-label="Close this auction now"
+                >
+                  <mat-icon>flag</mat-icon>
+                </button>
+              }
+              @if (allowed.canCancel) {
+                <button
+                  mat-icon-button
+                  type="button"
+                  class="bf-rowactions__danger"
+                  [disabled]="busyId() === auction.id"
+                  (click)="cancelAuction(auction)"
+                  matTooltip="Cancel this auction"
+                  aria-label="Cancel this auction"
+                >
+                  <mat-icon>block</mat-icon>
+                </button>
+              }
+              @if (!allowed.canOpen && !allowed.canClose && !allowed.canCancel) {
+                <span class="bf-muted bf-rowactions__none">—</span>
+              }
+            </div>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="columns"></tr>
+        <tr mat-row *matRowDef="let row; columns: columns"></tr>
+      </table>
+    </div>
+
+    <mat-paginator
+      [length]="result().totalElements"
+      [pageIndex]="pageIndex()"
+      [pageSize]="pageSize()"
+      [pageSizeOptions]="[15, 30, 50]"
+      (page)="onPageChange($event)"
+      aria-label="Select page of auctions"
+    />
+  }
+</div>

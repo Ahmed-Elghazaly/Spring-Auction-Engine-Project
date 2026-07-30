@@ -1,0 +1,20 @@
+.bf-countdown {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.85rem;
+  color: var(--mat-sys-on-surface-variant);
+  white-space: nowrap;
+}
+
+.bf-countdown__icon {
+  width: 17px;
+  height: 17px;
+  font-size: 17px;
+  line-height: 17px;
+}
+
+.bf-countdown--urgent {
+  color: var(--bf-status-cancelled);
+  font-weight: 500;
+}

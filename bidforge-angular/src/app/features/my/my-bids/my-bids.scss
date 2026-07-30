@@ -1,0 +1,83 @@
+@use '../my-page.scss';
+
+.bf-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 14px;
+}
+
+.bf-table {
+  width: 100%;
+  background: transparent;
+
+  th {
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+  }
+
+  td {
+    padding-top: 0.6rem;
+    padding-bottom: 0.6rem;
+  }
+}
+
+.bf-table__right {
+  text-align: right;
+}
+
+.bf-table__link {
+  color: var(--mat-sys-on-surface);
+  font-weight: 500;
+  text-decoration: none;
+
+  &:hover {
+    color: var(--mat-sys-primary);
+    text-decoration: underline;
+  }
+}
+
+.bf-table__sub {
+  display: block;
+  font-size: 0.75rem;
+}
+
+.bf-table-skeleton {
+  height: 320px;
+  border-radius: 14px;
+}
+
+.bf-outcome {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  white-space: nowrap;
+  background: var(--mat-sys-surface-container-high);
+  color: var(--mat-sys-on-surface-variant);
+
+  mat-icon {
+    font-size: 1rem;
+    width: 1rem;
+    height: 1rem;
+  }
+
+  &[data-tone='winning'] {
+    background: var(--bf-status-open-bg);
+    color: var(--bf-status-open);
+  }
+
+  &[data-tone='losing'] {
+    background: var(--bf-status-cancelled-bg);
+    color: var(--bf-status-cancelled);
+  }
+
+  &[data-tone='sealed'] {
+    background: var(--bf-status-scheduled-bg);
+    color: var(--bf-status-scheduled);
+  }
+}

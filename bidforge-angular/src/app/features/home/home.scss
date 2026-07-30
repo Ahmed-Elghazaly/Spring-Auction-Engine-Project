@@ -1,0 +1,134 @@
+.bf-hero {
+  background: linear-gradient(
+    160deg,
+    color-mix(in srgb, var(--mat-sys-primary) 12%, var(--mat-sys-surface)),
+    var(--mat-sys-surface)
+  );
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+  padding: 56px 0 48px;
+}
+
+.bf-hero__inner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 40px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.bf-hero__copy {
+  flex: 1 1 460px;
+  max-width: 640px;
+}
+
+.bf-hero__eyebrow {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--mat-sys-primary);
+  margin-bottom: 10px;
+}
+
+.bf-hero__title {
+  margin: 0 0 14px;
+  font-size: clamp(1.9rem, 4vw, 2.9rem);
+  line-height: 1.15;
+  font-weight: 500;
+  letter-spacing: -1px;
+}
+
+.bf-hero__lead {
+  margin: 0;
+  font-size: 1.03rem;
+  line-height: 1.65;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.bf-hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 26px;
+}
+
+.bf-hero__cta {
+  height: 46px;
+  padding: 0 22px;
+}
+
+.bf-hero__demo {
+  flex: 0 1 264px;
+  padding: 18px 20px;
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: var(--bf-radius);
+  background: var(--mat-sys-surface);
+}
+
+.bf-hero__demo-title {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0 0 12px;
+  font-size: 0.92rem;
+  font-weight: 500;
+
+  mat-icon {
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+    color: var(--mat-sys-primary);
+  }
+}
+
+.bf-hero__demo-list {
+  margin: 0;
+  font-size: 0.83rem;
+
+  > div {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 4px 0;
+    border-bottom: 1px dashed var(--mat-sys-outline-variant);
+  }
+
+  > div:last-child {
+    border-bottom: none;
+  }
+
+  dt {
+    font-weight: 500;
+  }
+
+  dd {
+    margin: 0;
+    color: var(--mat-sys-on-surface-variant);
+    font-family: monospace;
+  }
+}
+
+.bf-hero__demo-link {
+  margin-top: 10px;
+  width: 100%;
+}
+
+.bf-section-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.bf-section-head__title {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 500;
+}
+
+.bf-section-head__sub {
+  margin: 2px 0 0;
+  font-size: 0.88rem;
+}

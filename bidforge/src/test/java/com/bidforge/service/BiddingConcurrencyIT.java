@@ -51,8 +51,8 @@ class BiddingConcurrencyIT extends AbstractIntegrationTest {
     void setUp() {
         String unique = UUID.randomUUID().toString().substring(0, 8);
         sellerName = "seller_" + unique;
-        firstBidderName = "bidder1_" + unique;
-        secondBidderName = "bidder2_" + unique;
+        firstBidderName = "layla_" + unique;
+        secondBidderName = "youssef_" + unique;
 
         User seller = createUser(sellerName);
         createUser(firstBidderName);

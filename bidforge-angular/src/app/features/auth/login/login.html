@@ -1,0 +1,84 @@
+<div class="bf-container bf-page bf-auth">
+  <mat-card class="bf-auth__card" appearance="outlined">
+    @if (submitting()) {
+      <mat-progress-bar mode="indeterminate" />
+    }
+
+    <mat-card-header class="bf-auth__header">
+      <mat-card-title>Sign in</mat-card-title>
+      <mat-card-subtitle>Access your auctions, bids and wins.</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+
+      <form [formGroup]="form" (ngSubmit)="submit()" class="bf-form">
+        <mat-form-field appearance="outline">
+          <mat-label>Username</mat-label>
+
+          <input matInput formControlName="username" autocomplete="username" required />
+          <mat-icon matSuffix>person</mat-icon>
+          @if (form.controls.username.hasError('required')) {
+            <mat-error>Username is required</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Password</mat-label>
+          <input
+            matInput
+            [type]="hidePassword() ? 'password' : 'text'"
+            formControlName="password"
+            autocomplete="current-password"
+            required
+          />
+          <button
+            mat-icon-button
+            matSuffix
+            type="button"
+            (click)="hidePassword.set(!hidePassword())"
+            [attr.aria-label]="hidePassword() ? 'Show password' : 'Hide password'"
+          >
+            <mat-icon>{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+          @if (form.controls.password.hasError('required')) {
+            <mat-error>Password is required</mat-error>
+          }
+        </mat-form-field>
+
+        <button
+          mat-flat-button
+          type="submit"
+          class="bf-form__submit"
+          [disabled]="!canSubmit()"
+        >
+          {{ submitting() ? 'Signing in…' : 'Sign in' }}
+        </button>
+      </form>
+
+      <p class="bf-auth__switch bf-muted">
+        Don't have an account?
+        <a routerLink="/register">Create one</a>
+      </p>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card class="bf-auth__demo" appearance="outlined">
+    <mat-card-header>
+      <mat-card-title class="bf-auth__demo-title">
+        <mat-icon>science</mat-icon>
+        Demo accounts
+      </mat-card-title>
+      <mat-card-subtitle>Click one to fill the form.</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+
+      @for (account of demoAccounts; track account.username) {
+        <button type="button" class="bf-demo-account" (click)="fillDemoAccount(account)">
+          <span class="bf-demo-account__user">{{ account.username }}</span>
+          <span class="bf-demo-account__role">{{ account.role }}</span>
+          <mat-icon class="bf-demo-account__icon">arrow_forward</mat-icon>
+        </button>
+      }
+    </mat-card-content>
+  </mat-card>
+</div>

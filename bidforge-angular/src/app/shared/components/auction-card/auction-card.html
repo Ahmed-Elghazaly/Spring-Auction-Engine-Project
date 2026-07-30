@@ -1,0 +1,52 @@
+<a class="bf-card-link" [routerLink]="['/auctions', auction().id]">
+  <mat-card class="bf-card" appearance="outlined">
+
+    <div
+      class="bf-card__band"
+      [style.background]="'color-mix(in srgb, ' + visual().color + ' 16%, transparent)'"
+    >
+      <mat-icon class="bf-card__band-icon" [style.color]="visual().color">
+        {{ visual().icon }}
+      </mat-icon>
+      <span class="bf-card__band-label" [style.color]="visual().color">
+        {{ categoryLabel() }}
+      </span>
+
+      @if (isSealed()) {
+        <span class="bf-card__sealed" title="Bids stay secret until this auction closes">
+          <mat-icon>lock</mat-icon>
+          Sealed
+        </span>
+      }
+    </div>
+
+    <mat-card-content class="bf-card__body">
+      <h3 class="bf-card__title" [title]="auction().title">{{ auction().title }}</h3>
+
+      <div class="bf-card__meta">
+        <app-status-chip [status]="auction().status" />
+        <span class="bf-muted bf-card__type">{{ typeLabel() }}</span>
+      </div>
+
+      <div class="bf-card__price">
+        <span class="bf-muted bf-card__price-label">{{ priceLabel() }}</span>
+
+        <strong class="bf-card__price-value bf-tabular">
+          {{ displayPrice() | currency: 'USD' }}
+        </strong>
+      </div>
+
+      <div class="bf-card__footer">
+        <app-countdown
+          [status]="auction().status"
+          [startTime]="auction().startTime"
+          [endTime]="auction().endTime"
+        />
+        <span class="bf-muted bf-card__seller">
+          <mat-icon class="bf-card__seller-icon">person</mat-icon>
+          {{ auction().sellerUsername }}
+        </span>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</a>

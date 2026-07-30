@@ -1,0 +1,94 @@
+<mat-toolbar class="bf-toolbar">
+  <div class="bf-container bf-toolbar__inner">
+
+    <a routerLink="/" class="bf-brand" aria-label="BidForge home">
+      <mat-icon class="bf-brand__icon">gavel</mat-icon>
+      <span class="bf-brand__text">BidForge</span>
+    </a>
+
+    <nav class="bf-nav">
+
+      <a mat-button routerLink="/auctions" routerLinkActive="bf-nav__link--active">
+        <mat-icon>storefront</mat-icon>
+        <span class="bf-nav__label">Browse</span>
+      </a>
+
+      @if (auth.isLoggedIn()) {
+        <a mat-button routerLink="/auctions/new" routerLinkActive="bf-nav__link--active">
+          <mat-icon>add_circle</mat-icon>
+          <span class="bf-nav__label">Sell</span>
+        </a>
+      }
+    </nav>
+
+    <span class="bf-spacer"></span>
+
+    <button
+      mat-icon-button
+      type="button"
+      (click)="theme.toggle()"
+      [matTooltip]="theme.isDark() ? 'Switch to light mode' : 'Switch to dark mode'"
+      [attr.aria-label]="theme.isDark() ? 'Switch to light mode' : 'Switch to dark mode'"
+    >
+      <mat-icon>{{ theme.isDark() ? 'light_mode' : 'dark_mode' }}</mat-icon>
+    </button>
+
+    @if (auth.isLoggedIn()) {
+      <button
+        mat-button
+        type="button"
+        class="bf-account"
+        [matMenuTriggerFor]="accountMenu"
+        aria-label="Account menu"
+      >
+        <span class="bf-avatar" aria-hidden="true">{{ auth.initials() }}</span>
+        <span class="bf-account__name">{{ auth.username() }}</span>
+        <mat-icon class="bf-account__caret">arrow_drop_down</mat-icon>
+      </button>
+
+      <mat-menu #accountMenu="matMenu" xPosition="before">
+        <a mat-menu-item routerLink="/my/auctions">
+          <mat-icon>inventory_2</mat-icon>
+          <span>My auctions</span>
+        </a>
+        <a mat-menu-item routerLink="/my/bids">
+          <mat-icon>gavel</mat-icon>
+          <span>My bids</span>
+        </a>
+        <a mat-menu-item routerLink="/my/won">
+          <mat-icon>emoji_events</mat-icon>
+          <span>Auctions I won</span>
+        </a>
+        <a mat-menu-item routerLink="/my/profile">
+          <mat-icon>person</mat-icon>
+          <span>My profile</span>
+        </a>
+
+        @if (auth.isAdmin()) {
+          <mat-divider />
+          <a mat-menu-item routerLink="/admin/users">
+            <mat-icon>manage_accounts</mat-icon>
+            <span>Manage users</span>
+          </a>
+          <a mat-menu-item routerLink="/admin/auctions">
+            <mat-icon>fact_check</mat-icon>
+            <span>All auctions</span>
+          </a>
+          <a mat-menu-item routerLink="/admin/audit">
+            <mat-icon>history</mat-icon>
+            <span>Audit trail</span>
+          </a>
+        }
+
+        <mat-divider />
+        <button mat-menu-item type="button" (click)="signOut()">
+          <mat-icon>logout</mat-icon>
+          <span>Sign out</span>
+        </button>
+      </mat-menu>
+    } @else {
+      <a mat-button routerLink="/login">Sign in</a>
+      <a mat-flat-button routerLink="/register" class="bf-cta">Register</a>
+    }
+  </div>
+</mat-toolbar>

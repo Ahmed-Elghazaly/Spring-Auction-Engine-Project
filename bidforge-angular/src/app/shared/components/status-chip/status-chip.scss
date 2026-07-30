@@ -1,0 +1,31 @@
+.bf-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.bf-chip--scheduled {
+  background: var(--bf-status-scheduled-bg);
+  color: var(--bf-status-scheduled);
+}
+
+.bf-chip--open {
+  background: var(--bf-status-open-bg);
+  color: var(--bf-status-open);
+}
+
+.bf-chip--closed {
+  background: var(--bf-status-closed-bg);
+  color: var(--bf-status-closed);
+}
+
+.bf-chip--cancelled {
+  background: var(--bf-status-cancelled-bg);
+  color: var(--bf-status-cancelled);
+}
